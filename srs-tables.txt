@@ -1,0 +1,124 @@
+
+=== Table 0 ===
+Mã Use case | UC001 | Tên Use case | Tạo tài khoản
+Tác nhân | Hội viên | Hội viên | Hội viên
+Tiền điều kiện | Người dùng chưa có tài khoản trong hệ thống. | Người dùng chưa có tài khoản trong hệ thống. | Người dùng chưa có tài khoản trong hệ thống.
+Luồng sự kiện chính
+(Thành công) |  |  | 
+Luồng sự kiện thay thế |  |  | 
+Hậu điều kiện | Không | Không | Không
+
+=== Table 1 ===
+STT | Trường    dữ liệu | Mô tả | Bắt buộc? | Điều kiện hợp lệ | Ví dụ
+ | Họ tên | Họ và tên đầy đủ của người dùng | Có | Không rỗng, tối đa 100 ký tự | Nguyễn Văn A
+ | Số điện thoại | Số điện thoại dùng để liên hệ và đăng nhập | Có | 10 số, bắt đầu bằng 0, chưa đăng ký trong hệ thống | 0901234567
+3 | Email | Địa chỉ email của người dùng | Không | Định dạng email hợp lệ | a@gmail.com
+4 | Mật khẩu | Mật khẩu dùng để xác thực tài khoản | Có | Tối thiểu 8 ký tự, có chữ và số | Gym@2024
+5 | Ngày sinh | Ngày tháng năm sinh của người dùng | Có | Ngày hợp lệ, người dùng đủ 16 tuổi | 01/01/2000
+
+=== Table 2 ===
+Mã Use case | UC002 | Tên Use case | Đăng ký hoặc gia hạn gói tập
+Tác nhân | Hội viên / Staff | Hội viên / Staff | Hội viên / Staff
+Tiền điều kiện | Hội viên đã có tài khoản trong hệ thống. Staff đã đăng nhập. | Hội viên đã có tài khoản trong hệ thống. Staff đã đăng nhập. | Hội viên đã có tài khoản trong hệ thống. Staff đã đăng nhập.
+Luồng sự kiện chính
+(Thành công) |  |  | 
+Luồng sự kiện thay thế |  |  | 
+Hậu điều kiện | Gói tập được kích hoạt hoặc gia hạn thành công. Hóa đơn được xuất và lưu vào hệ thống. | Gói tập được kích hoạt hoặc gia hạn thành công. Hóa đơn được xuất và lưu vào hệ thống. | Gói tập được kích hoạt hoặc gia hạn thành công. Hóa đơn được xuất và lưu vào hệ thống.
+
+=== Table 3 ===
+Mã Use case | UC003 | Tên Use case | Xửlýthanh toán
+Tác nhân | Staff | Staff | Staff
+Tiền điều kiện | Gói tập đã được chọn. Staff đã đăng nhập. | Gói tập đã được chọn. Staff đã đăng nhập. | Gói tập đã được chọn. Staff đã đăng nhập.
+Luồng sự kiện chính
+(Thành công) |  |  | 
+Luồng sự kiện thay thế |  |  | 
+Hậu điều kiện | Giao dịch thanh toán được ghi nhận. Hóa đơn được xuất thành công. | Giao dịch thanh toán được ghi nhận. Hóa đơn được xuất thành công. | Giao dịch thanh toán được ghi nhận. Hóa đơn được xuất thành công.
+
+=== Table 4 ===
+STT | Trường    dữ liệu | Mô tả | Bắt buộc? | Điều kiện hợp lệ | Ví dụ
+ | Phương thức thanh toán | Hình thức thanh toán mà người dùng lựa chọn | Có | Tiền mặt / Thẻ ngân hàng / Ví điện tử | Tiền mặt
+ | Số tiền (VNĐ) | Tổng số tiền cần thanh toán cho gói tập | Có | Bằng giá gói tập đã chọn, không âm | 1200000
+
+=== Table 5 ===
+Mã Use case | UC004 | Tên Use case | Xem danh sách gói tập
+Tác nhân | Hội viên | Hội viên | Hội viên
+Tiền điều kiện | Hội viên đăng nhập thành công vào hệ thống | Hội viên đăng nhập thành công vào hệ thống | Hội viên đăng nhập thành công vào hệ thống
+Luồng sự kiện chính
+(Thành công) |  |  | 
+Luồng sự kiện thay thế |  |  | 
+Hậu điều kiện | Hệ thống hiển thị thành công danh sách các gói tập đang hoạt động. | Hệ thống hiển thị thành công danh sách các gói tập đang hoạt động. | Hệ thống hiển thị thành công danh sách các gói tập đang hoạt động.
+
+=== Table 6 ===
+Mã Use case | UC008 | Tên Use case | Quản lý hội viên
+Tác nhân | Staff | Staff | Staff
+Tiền điều kiện | Staff đã đăng nhập vào hệ thống với vai trò Nhân viên quản lý. | Staff đã đăng nhập vào hệ thống với vai trò Nhân viên quản lý. | Staff đã đăng nhập vào hệ thống với vai trò Nhân viên quản lý.
+Luồng sự kiện chính 
+(Thành công) |  |  | 
+Luồng sự kiện thay thế |  |  | 
+Hậu điều kiện | Hồ sơ hội viên được tạo mới (hoặc cập nhật) thành công trong cơ sở dữ liệu với Mã hội viên duy nhất và trạng thái "Chờ kích hoạt". | Hồ sơ hội viên được tạo mới (hoặc cập nhật) thành công trong cơ sở dữ liệu với Mã hội viên duy nhất và trạng thái "Chờ kích hoạt". | Hồ sơ hội viên được tạo mới (hoặc cập nhật) thành công trong cơ sở dữ liệu với Mã hội viên duy nhất và trạng thái "Chờ kích hoạt".
+
+=== Table 7 ===
+STT | Trường dữ liệu | Mô tả | Bắt buộc? | Điều kiện hợp lệ | Ví dụ
+1 | Họ tên | Họ và tên đầy đủ của hội viên | Có | Không rỗng, tối đa 100 ký tự | Trần Thị B
+2 | Số điện thoại | Số điện thoại liên hệ và đăng nhập | Có | 10 số, bắt đầu bằng 0, duy nhất trong hệ thống | 0912345678
+3 | Ngày sinh | Ngày tháng năm sinh của hội viên | Có | Ngày hợp lệ, hội viên đủ 16 tuổi | 15/06/1995
+4 | Nghề nghiệp | Nghề nghiệp hiện tại của hội viên | Có | Không rỗng, tối đa 100 ký tự | Nhân viên văn phòng
+5 | Loại thành viên | Phân loại thành viên đăng ký | Có | Thường / VIP / PT | Thường
+6 | Dữ liệu vân tay | Mẫu vân tay dùng để check-in | Không | Yêu cầu thiết bị quét hỗ trợ; lưu trữ dưới dạng mã hóa | (binary)
+
+=== Table 8 ===
+Mã Use case | UC009 | Tên Use case | Check-in hội viên
+Tác nhân | Hội viên (Member), Staff (hỗ trợ tại quầy) | Hội viên (Member), Staff (hỗ trợ tại quầy) | Hội viên (Member), Staff (hỗ trợ tại quầy)
+Tiền điều kiện | Hội viên đã có hồ sơ trong hệ thống và đang sở hữu ít nhất một gói tập với trạng thái "Active". Staff đã đăng nhập (nếu hỗ trợ tại quầy). | Hội viên đã có hồ sơ trong hệ thống và đang sở hữu ít nhất một gói tập với trạng thái "Active". Staff đã đăng nhập (nếu hỗ trợ tại quầy). | Hội viên đã có hồ sơ trong hệ thống và đang sở hữu ít nhất một gói tập với trạng thái "Active". Staff đã đăng nhập (nếu hỗ trợ tại quầy).
+Luồng sự kiện chính 
+(Thành công) |  |  | 
+Luồng sự kiện thay thế |  |  | 
+Hậu điều kiện | Lịch sử check-in được ghi nhận trong hệ thống với Ngày, Giờ chính xác. Nếu là gói theo buổi, số dư buổi tập của hội viên đã được cập nhật (giảm 1). Hội viên nhận thông báo xác nhận check-in thành công. | Lịch sử check-in được ghi nhận trong hệ thống với Ngày, Giờ chính xác. Nếu là gói theo buổi, số dư buổi tập của hội viên đã được cập nhật (giảm 1). Hội viên nhận thông báo xác nhận check-in thành công. | Lịch sử check-in được ghi nhận trong hệ thống với Ngày, Giờ chính xác. Nếu là gói theo buổi, số dư buổi tập của hội viên đã được cập nhật (giảm 1). Hội viên nhận thông báo xác nhận check-in thành công.
+
+=== Table 9 ===
+Mã Use case | UC010 | Tên Use case | Tiếp nhận và xửlýphản hồi
+Tác nhân | Staff | Staff | Staff
+Tiền điều kiện | Staff đã đăng nhập vào hệ thống. Có ít nhất một phản hồi từ hội viên đang ở trạng thái "Mới" hoặc "Đang xử lý" trong hệ thống. | Staff đã đăng nhập vào hệ thống. Có ít nhất một phản hồi từ hội viên đang ở trạng thái "Mới" hoặc "Đang xử lý" trong hệ thống. | Staff đã đăng nhập vào hệ thống. Có ít nhất một phản hồi từ hội viên đang ở trạng thái "Mới" hoặc "Đang xử lý" trong hệ thống.
+Luồng sự kiện chính 
+(Thành công) |  |  | 
+Luồng sự kiện thay thế |  |  | 
+Hậu điều kiện | Phản hồi được xửlývà cập nhật trạng thái thành "Đã hoàn tất". Hội viên đã nhận được phản hồi từ Staff. Lịch sử xửlýđược lưu trong hệ thống. | Phản hồi được xửlývà cập nhật trạng thái thành "Đã hoàn tất". Hội viên đã nhận được phản hồi từ Staff. Lịch sử xửlýđược lưu trong hệ thống. | Phản hồi được xửlývà cập nhật trạng thái thành "Đã hoàn tất". Hội viên đã nhận được phản hồi từ Staff. Lịch sử xửlýđược lưu trong hệ thống.
+
+=== Table 10 ===
+Mã Use case | UC011 | Tên Use case | Quản lý gói tập
+Tác nhân | Chủ phòng tập (Owner) | Chủ phòng tập (Owner) | Chủ phòng tập (Owner)
+Tiền điều kiện | Owner đã đăng nhập vào hệ thống với vai trò Chủ phòng tập. | Owner đã đăng nhập vào hệ thống với vai trò Chủ phòng tập. | Owner đã đăng nhập vào hệ thống với vai trò Chủ phòng tập.
+Luồng sự kiện chính 
+(Thành công) |  |  | 
+Luồng sự kiện thay thế |  |  | 
+Hậu điều kiện | Gói tập được tạo mới / cập nhật / vô hiệu hóa thành công. Danh sách gói tập hiển thị cho hội viên phản ánh thay đổi ngay lập tức. | Gói tập được tạo mới / cập nhật / vô hiệu hóa thành công. Danh sách gói tập hiển thị cho hội viên phản ánh thay đổi ngay lập tức. | Gói tập được tạo mới / cập nhật / vô hiệu hóa thành công. Danh sách gói tập hiển thị cho hội viên phản ánh thay đổi ngay lập tức.
+
+=== Table 11 ===
+STT | Trường dữ liệu | Mô tả | Bắt buộc? | Điều kiện hợp lệ | Ví dụ
+1 | Tên gói | Tên hiển thị của gói tập | Có | Không rỗng, tối đa 100 ký tự, duy nhất trong hệ thống | Gói 3 tháng
+2 | Thời hạn (ngày) | Số ngày hiệu lực của gói tập kể từ ngày kích hoạt | Có | Số nguyên dương | 90
+3 | Giá tiền (VNĐ) | Giá bán của gói tập tính bằng đồng | Có | Số dương | 1.200.000
+4 | Phân loại | Loại gói tập áp dụng | Có | VIP / Thường / PT | Thường
+5 | Mô tả | Mô tả chi tiết quyền lợi của gói tập | Không | Tối đa 500 ký tự | Không giới hạn buổi tập.
+
+=== Table 12 ===
+Mã Use case | UC012 | Tên Use case | Quản lý nhân sự
+Tác nhân | Chủ phòng tập (Owner) | Chủ phòng tập (Owner) | Chủ phòng tập (Owner)
+Tiền điều kiện | Owner đã đăng nhập vào hệ thống. | Owner đã đăng nhập vào hệ thống. | Owner đã đăng nhập vào hệ thống.
+Luồng sự kiện chính
+(Thành công) |  |  | 
+Luồng sự kiện thay thế |  |  | 
+Hậu điều kiện | Tài khoản nhân viên được tạo mới / cập nhật quyền thành công. | Tài khoản nhân viên được tạo mới / cập nhật quyền thành công. | Tài khoản nhân viên được tạo mới / cập nhật quyền thành công.
+
+=== Table 13 ===
+STT | Trường dữ liệu | Bắt buộc? | Điều kiện hợp lệ | Ví dụ
+1 | STT | Có | Không rỗng | Phòng Gym chính
+2 | Tên chức năng | Có | Gym / Yoga / Fitness / Khác | Gym
+3 | Nhóm chức năng | Có | Đang mở / Bảo trì / Ngừng hoạt động | Đang mở
+
+=== Table 14 ===
+STT | Trường dữ liệu | Bắt buộc? | Điều kiện hợp lệ | Ví dụ
+1 | Nội dung bài tập | Có | Không rỗng | Squat, Bench Press, Deadlift
+2 | Thời lượng (phút) | Có | Số dương | 60
+3 | Đánh giá | Không | 1–5 sao hoặc Good / Average / Poor | Good
+4 | Ghi chú | Không | Tối đa 300 ký tự | Cần cải thiện kỹ thuật squat.

@@ -1,0 +1,121 @@
+0: [normal] TRƯỜNG ĐẠI HỌC BÁCH KHOA HÀ NỘI
+1: [normal] Viện Công nghệ thông tin và Truyền thông
+3: [normal] Tài liệu đặc tả yêu cầu phần mềm
+4: [normal] (Software Requirement Specification – SRS)
+5: [normal] Phiên bản <số>
+8: [normal] Hệ thống quản lý phòng Gym
+9: [normal] Môn: <Tên môn>
+12: [normal] Nhóm 17
+13: [normal] Trần Đăng Bách - 20235661
+14: [normal] Nông Quốc Cường - 20235668
+15: [normal] Vũ Huy Hoàng - 20235732
+19: [normal] Hà Nội, ngày … tháng … năm …
+20: [normal] <Các chú thích nằm trong cặp dấu ngoặc nhọn không nằm trong tài liệu này, mục đích là để giải thích thêm. Khi sinh viên sử dụng tài liệu này, cần xoá các phần chú thích này trong bài làm của mình và điền nội dung theo chỉ dẫn>
+21: [normal] <Tài liệu này được viết bởi TS. Nguyễn Thị Thu Trang, như một case study dùng cho sinh viên trong các học phần liên quan. Nghiêm cấm mọi hành vi sửa đổi hoặc sử dụng khi chưa có sự đồng ý của tác giả.>
+22: [normal] Mục lục
+25: [Heading 1] Giới thiệu
+26: [Heading 2] Mục đích
+27: [normal] Tài liệu này mô tả chi tiết các yêu cầu phần mềm cho Hệ thống Quản lý Phòng tập Gym, bao gồm các phân hệ chức năng, các tác nhân tham gia hệ thống và các ràng buộc nghiệp vụ liên quan.
+28: [normal] Tài liệu mô tả mục đích, phạm vi, các tính năng chính, giao diện hệ thống và các ràng buộc cần thực hiện để hệ thống phản ứng đúng với các yêu cầu từ người dùng và tác nhân bên ngoài.
+29: [normal] Tài liệu dành cho các bên liên quan (stakeholder) bao gồm chủ phòng tập, nhân viên vận hành, và các nhà phát triển phần mềm tham gia dự án.
+30: [Heading 2] Phạm vi
+31: [normal] Trong thực tế, các phòng tập gym hiện nay phải quản lý đồng thời nhiều nghiệp vụ phức tạp như quản lý hội viên, gói tập, thiết bị, nhân sự và doanh thu. Việc thực hiện thủ công hoặc qua nhiều công cụ rời rạc dễ dẫn đến sai sót, thất thoát dữ liệu và trải nghiệm hội viên kém.
+32: [normal] Phần mềm Hệ thống Quản lý Phòng tập Gym được xây dựng nhằm số hóa và tích hợp toàn bộ các nghiệp vụ vận hành của một phòng tập trên một nền tảng duy nhất. Cụ thể:
+33: [normal] Hội viên có thể tự tạo tài khoản, đăng nhập để theo dõi gói tập, lịch sử tập luyện, đăng ký hoặc gia hạn gói tập trực tuyến và gửi phản hồi về chất lượng dịch vụ.
+34: [normal] Nhân viên quản lý thực hiện các nghiệp vụ hàng ngày như đăng ký hồ sơ hội viên mới, check-in, xử lý thanh toán, quản lý thiết bị và tiếp nhận phản hồi từ hội viên.
+35: [normal] Huấn luyện viên cá nhân (PT) quản lý danh sách học viên của mình, lên lịch tập và theo dõi tiến độ tập luyện của từng hội viên.
+36: [normal] Chủ phòng tập có quyền cao nhất, bao gồm quản lý nhân sự, thiết lập các gói tập, phân quyền hệ thống và xem báo cáo thống kê doanh thu, hiệu suất vận hành.
+37: [normal] Hệ thống hỗ trợ phân quyền theo vai trò (role-based access control), đảm bảo mỗi tác nhân chỉ truy cập được các chức năng phù hợp với vai trò của mình.
+39: [Heading 2] Từ điển thuật ngữ
+40: [normal] <Đưa ra các thuật ngữ và giải thích cho thuật ngữ đó trong nghiệp vụ của phần mềm, và được sử dụng trong tài liệu này. Không được tự ý mặc định về kinh nghiệm hoặc kiến thức của người đọc>
+42: [Heading 2] Tài liệu tham khảo
+43: [normal] <Liệt kê danh sách tài liệu tham khảo được sử dụng trong tài liệu này, bao gồm các tài liệu liên quan đến dự án> 
+44: [Heading 1] Mô tả tổng quan
+45: [Heading 2] Các tác nhân
+46: [normal] Hệ thống có bốn tác nhân chính:
+47: [normal] Chủ phòng tập (Owner): Người quản lý cao nhất, chịu trách nhiệm tổng thể hoạt động kinh doanh, xem báo cáo và phân quyền.
+48: [normal] Nhân viên quản lý (Staff): Thực hiện các nghiệp vụ vận hành hàng ngày như đăng ký hội viên, check-in, quản lý gói tập, thiết bị và xử lý phản hồi.
+49: [normal] Huấn luyện viên cá nhân (PT): Quản lý danh sách học viên, theo dõi lịch tập, hướng dẫn và đánh giá tiến độ tập luyện.
+50: [normal] Hội viên (Member): Người sử dụng dịch vụ, thực hiện check-in, theo dõi tài khoản, đăng ký/gia hạn gói tập và gửi phản hồi.
+51: [Heading 2] Biểu đồ use case tổng quan
+52: [normal] Khi chưa đăng nhập, hội viên có thể tạo tài khoản mới và đăng nhập vào hệ thống. Sau khi đăng nhập thành công, hệ thống tự động hiển thị các chức năng tương ứng với vai trò của tài khoản đó.
+53: [normal] Đối với hội viên, sau khi đăng nhập có thể quảnlýthông tin cá nhân, xem danh sách gói tập, đăng ký hoặc gia hạn gói tập, xem lịch sử tập luyện và gửi phản hồi. Khi hội viên đăng ký hoặc gia hạn gói tập, hệ thống bắt buộc thực hiện quy trình xửlýthanh toán, bao gồm chọn phương thức thanh toán, ghi nhận giao dịch, xuất hóa đơn và kích hoạt gói tập.
+54: [normal] Đối với Staff, sau khi đăng nhập có thể thực hiện toàn bộ các nghiệp vụ vận hành hàng ngày. Khi xửlýthanh toán, hệ thống bắt buộc xuất hóa đơn sau khi ghi nhận giao dịch thành công. Khi tiếp nhận phản hồi từ hội viên, Staff có trách nhiệm xửlývà phản hồi lại.
+55: [normal] Đối với PT, sau khi đăng nhập có thể xem và quản lý danh sách học viên của mình, quảnlýlịch tập và ghi nhận tiến độ tập luyện sau mỗi buổi. Hệ thống giới hạn PT chỉ được xem thông tin học viên được phân công cho mình.
+56: [normal] Đối với Owner, sau khi đăng nhập có toàn quyền quản lý hệ thống bao gồm quản lý nhân sự, thiết lập gói tập và xem báo cáo thống kê.
+59: [normal] Quản trị viên có thể quản lý người dùng và nhóm người, chức năng và loại chức năng có trong hệ thống. Đồng thời, quản trị viên có thể phân nhóm cho người dùng, và phân quyền sử dụng chức năng cho nhóm người dùng. Các use case của quản trị viên trong biểu đồ use case tổng quan này là use case phức hợp của một nhóm các use case. Chi tiết về các use case phức này được đưa ra trong các biểu đồ phân rã ở phần sau.
+60: [Heading 2] Biểu đồ use case phân rã
+61: [Heading 3] Phân rã use case “Xử lý thanh toán”
+64: [Heading 3] Phân rã use case “Quản lý gói tập”
+66: [normal] 2.3.5 Phân rã use case “Quản lý nhân sự”
+68: [normal] 2.3.6 Phân rã use case “Đăng ký/Gia hạn gói tập”
+70: [normal] 2.3.7 Phân rã UseCase “Quản lý hội viên”
+74: [Heading 2] Quy trình nghiệp vụ
+75: [normal] Trong hệ thống này, có bốn quy trình nghiệp vụ chính: quy trình đăng ký hội viên mới, quy trình check-in hội viên, quy trình xửlýthanh toán, và quy trình theo dõi tiến độ tập luyện. Chi tiết các hành động trong từng quy trình được mô hình hóa bằng biểu đồ hoạt động trong các mục con dưới đây. 
+76: [Heading 3] Quy trình đăng ký hội viên mới 
+77: [normal] Hội viên cung cấp thông tin cá nhân và lựa chọn gói tập phù hợp. Staff tiếp nhận thông tin và tạo hồ sơ hội viên trên hệ thống. Tiếp theo, hội viên thực hiện thanh toán. Nếu thanh toán thành công, hệ thống xuất hóa đơn, cấp mã hội viên, kích hoạt gói tập và gửi thông báo xác nhận. Nếu thanh toán thất bại, hội viên được yêu cầu chọn lại phương thức thanh toán. 
+80: [Heading 3]  Quy trình xử lý thanh toán 
+81: [normal] Staff xác nhận thông tin hóa đơn và hội viên chọn phương thức thanh toán. Nếu thanh toán bằng tiền mặt, Staff trực tiếp nhận tiền. Nếu thanh toán bằng thẻ hoặc ví điện tử, hệ thống kết nối cổng thanh toán để xử lí. Sau khi thanh toán thành công, hệ thống ghi nhận giao dịch, xuất hóa đơn và kích hoạt hoặc gia hạn gói tập cho hội viên. Nếu thanh toán thất bại, hội viên được yêu cầu chọn lại phương thức. 
+83: [Heading 3] Quy trình quản lý gói tập 
+84: [normal] Chủ phòng tập (Owner) có thể quản lý các gói tập có trong hệ thống theo quy trình như sau. Chủ phòng tập truy cập vào module quản lý gói tập, hệ thống sẽ hiển thị danh sách các gói tập hiện có. Từ đây, Chủ phòng tập có thể thực hiện tìm kiếm/lọc, hoặc lựa chọn các thao tác: Thêm gói tập mới, Sửa thông tin gói tập đã có, hoặc Khóa/Kích hoạt lại một gói tập. 
+86: [Heading 3] Quy trình theo dõi và đánh giá tiến độ tập luyện  
+87: [normal] PT truy cập danh sách học viên được phân công. PT chọn học viên muốn ghi nhận và xem lịch sử các buổi tập trước đó. Sau mỗi buổi tập, PT ghi nhận nội dung buổi tập và đánh giá tiến độ của học viên. Hệ thống lưu trữ thông tin và cập nhật lịch sử tập luyện để hội viên có thể xem lại qua tài khoản của mình. 
+89: [Heading 3] Quy trình quản lý lịch tập học viên 
+90: [normal] Huấn luyện viên cá nhân (PT) đăng nhập vào hệ thống và truy cập danh sách các học viên mà mình đang phụ trách. Tại đây, PT lựa chọn một trong hai thao tác: tạo lịch tập mới cho một hội viên, hoặc chỉnh sửa lịch tập đã có. Với thao tác tạo lịch mới, PT chọn hội viên cần lập lịch; với thao tác chỉnh sửa, PT chọn lịch tập có sẵn từ danh sách. Tiếp theo, PT nhập thông tin lịch tập gồm ngày, giờ và loại bài tập. Hệ thống kiểm tra xem lịch vừa nhập có trùng với các lịch tập khác (của chính PT hoặc của hội viên) hay không. Nếu phát hiện trùng lịch, hệ thống hiển thị thông báo và yêu cầu PT chọn lại thời gian, quay lại bước nhập thông tin. Khi lịch hợp lệ, hệ thống lưu lịch tập vào cơ sở dữ liệu, cập nhật lại giao diện lịch tuần / tháng của PT và gửi thông báo lịch tập sắp tới đến hội viên liên quan. 
+92: [Heading 3] Quy trình check-in hội viên
+93: [normal] Khi đến phòng tập, hội viên xuất trình Mã ID hoặc thực hiện quét vân tay tại thiết bị check-in đặt ở quầy lễ tân. Hệ thống tra cứu hồ sơ hội viên theo dữ liệu vừa nhận. Nếu không tìm thấy hồ sơ tương ứng, hệ thống hiển thị thông báo lỗi yêu cầu hội viên kiểm tra lại Mã ID hoặc liên hệ Staff, và kết thúc quy trình. Trường hợp tìm thấy hồ sơ, hệ thống tiếp tục kiểm tra trạng thái gói tập hiện tại của hội viên. Nếu gói tập đã hết hạn hoặc hết buổi, hệ thống từ chối check-in, hiển thị thông báo gợi ý hội viên gia hạn gói tập (gọi sang quy trình UC002). Nếu gói tập còn hiệu lực, hệ thống xét tiếp loại gói: với gói tính theo buổi, hệ thống tự động trừ 01 buổi tập khỏi số dư của hội viên; với gói theo thời hạn, bước trừ buổi được bỏ qua. Sau đó hệ thống ghi nhận lịch sử check-in vào cơ sở dữ liệu kèm theo Ngày, Giờ vào, hiển thị thông báo chào mừng cùng thông tin số buổi hoặc số ngày tập còn lại, và cho phép hội viên vào phòng tập. 
+95: [Heading 3] Quy trình gửi và tiếp nhận phản hồi  
+96: [normal] Phía Hội viên: Hội viên chọn chức năng Gửi phản hồi và chọn phân loại (Nhân viên / Thiết bị / Gói tập). Hội viên nhập nội dung phản hồi và điểm đánh giá (số sao). Hệ thống kiểm tra nội dung có hợp lệ không. Nếu hội viên chưa nhập nội dung hoặc chưa chọn phân loại, hệ thống thông báo lỗi và yêu cầu nhập lại. Nếu hợp lệ, hội viên xác nhận gửi.
+97: [normal] Phía Staff: Hệ thống tự động gửi thông báo đến Staff khi có phản hồi mới. Staff mở phản hồi, xem nội dung chi tiết và cập nhật trạng thái sang "Đang xử lý". Staff nhập nội dung phản hồi lại và gửi đến hội viên. Sau khi xử lý xong, Staff cập nhật trạng thái sang "Đã hoàn tất". Hệ thống ghi nhận người xử lý và thời gian hoàn tất. Hội viên nhận được kết quả xử lý phản hồi từ phía Staff.
+100: [Heading 1] Đặc tả các chức năng
+101: [normal] Chi tiết về các use case được đưa ra trong phần 2 được đặc tả trong các phần dưới đây.
+102: [Heading 2] Đặc tả use case UC001 "Tạo tài khoản" 
+105: [normal] * Dữ liệu đầu vào của thông tin cá nhân gồm các trường dữ liệu sau:
+107: [Heading 2] Đặc tả use case UC002 "Đăng ký hoặc gia hạn gói tập"
+108: [Heading 2] Đặc tả use case UC003 "Xử lý thanh toán" 
+109: [normal] * Dữ liệu đầu vào của thông tin cá nhân gồm các trường dữ liệu sau:
+110: [Heading 2] Đặc tả use case UC004 “Xem danh sách gói tập”
+111: [Heading 2] Đặc tả use case UC005 “Xem danh sách gói tập”
+112: [Heading 2] Đặc tả use case UC006 "Gửi phản hồi"
+113: [normal] * Dữ liệu đầu vào gồm các trường dữ liệu sau: 
+116: [Heading 2] Đặc tả use case UC007 "Quản lý thông tin cá nhân"
+118: [Heading 2] Đặc tả use case UC008 "Quản lý hội viên"
+120: [normal] * Dữ liệu đầu vào của thông tin hội viên gồm các trường dữ liệu sau:
+122: [Heading 2] Đặc tả use case UC009 "Check-in hội viên"
+125: [Heading 2]  Đặc tả use case UC010 "Tiếp nhận và xửlýphản hồi"
+127: [Heading 2]  Đặc tả use case UC011 "Quản lý gói tập"
+129: [normal] * Dữ liệu đầu vào của gói tập gồm các trường dữ liệu sau:
+132: [Heading 2]  Đặc tả use case UC012 "Quản lý nhân sự"
+134: [Heading 2]  Đặc tả use case UC013 "Quản lý thông tin phòng tập" 
+135: [normal] *Dữ liệu đầu vào gồm các trường dữ liệu sau: 
+136: [Heading 2]  Đặc tả use case UC014 "Quản lý thiết bị" 
+137: [Heading 2]  Đặc tả use case UC015 "Quản lý danh sách học viên" 
+138: [Heading 2]  Đặc tả use case UC016 "Theo dõi và đánh giá tiến độ tập luyện"
+141: [normal] *Dữ liệu đầu vào gồm các trường dữ liệu sau: 
+143: [Heading 2]  Đặc tả use case UC017 "Quản lý lịch tập học viên"
+146: [normal] Dữ liệu đầu vào gồm các trường dữ liệu sau: 
+148: [Heading 2]  Đặc tả use case UC018 "Xem báo cáo"
+151: [Heading 2]  Đặc tả use case UC019 "Quản lý hệ thống"
+156: [Heading 1] Các yêu cầu khác
+157: [Heading 2] Chức năng (Functionality)
+158: [normal] Các yêu cầu về chức năng chung áp dụng cho toàn bộ hệ thống:
+159: [normal] Xử lý lỗi cơ sở dữ liệu: Trong tất cả các chuỗi sự kiện của các use case, tất cả các bước có thao tác với cơ sở dữ liệu, nếu có lỗi trong quá trình kết nối hoặc thao tác, hệ thống cần hiển thị thông báo lỗi rõ ràng để tác nhân phân biệt được đây là lỗi hệ thống / cơ sở dữ liệu, không phải lỗi do người dùng nhập sai. Thông báo cần ghi rõ mã lỗi và hướng dẫn liên hệ quản trị viên khi cần.
+160: [normal] Xác thực và phân quyền: Tất cả các use case yêu cầu đăng nhập phải kiểm tra phiên làm việc (session) hợp lệ trước khi thực thi. Nếu phiên đã hết hạn, hệ thống tự động chuyển về màn hình đăng nhập và hiển thị thông báo. Mỗi tác nhân (Owner, Staff, PT, Member) chỉ được truy cập các chức năng tương ứng với vai trò đã được phân quyền.
+161: [normal] Định dạng hiển thị chung áp dụng nhất quán trên toàn hệ thống:
+162: [normal] Số: căn phải
+163: [normal] Chữ: căn trái
+164: [normal] Font: Arial 14, màu đen
+165: [normal] Nền: trắng
+166: [normal] Ngày tháng: định dạng dd/MM/yyyy
+167: [normal] Tiền tệ: định dạng số có dấu phân cách hàng nghìn, đơn vị VNĐ (ví dụ: 1.200.000 VNĐ)
+168: [normal] Tính nhất quán dữ liệu: Các thao tác liên quan đến nhiều bảng dữ liệu (ví dụ: đăng ký gói tập kết hợp với thanh toán) phải được thực hiện trong cùng một transaction. Nếu bất kỳ bước nào thất bại, toàn bộ thao tác phải được rollback để tránh dữ liệu không nhất quán.
+169: [normal] Ghi nhật ký (Logging): Hệ thống phải ghi lại nhật ký các hành động quan trọng bao gồm đăng nhập / đăng xuất, thay đổi thông tin hội viên, thao tác thanh toán, thay đổi phân quyền. Nhật ký lưu trữ tối thiểu 90 ngày để phục vụ kiểm tra khi cần.
+171: [Heading 2] Tính dễ dùng (Usability)
+172: [normal] Các chức năng cần được thiết kế sao cho người dùng ở mọi trình độ đều có thể thao tác dễ dàng mà không cần đào tạo chuyên sâu. Cụ thể:
+173: [normal] Thông báo lỗi rõ ràng: Khi người dùng nhập sai hoặc bỏ trống trường bắt buộc, hệ thống phải chỉ ra chính xác trường nào bị lỗi, lỗi là gì và cách khắc phục. Ví dụ: thay vì hiển thị "Dữ liệu không hợp lệ", cần hiển thị "Số điện thoại phải gồm đúng 10 chữ số và bắt đầu bằng 0".
+174: [normal] Xác nhận trước khi thực hiện hành động không thể hoàn tác: Các thao tác xóa, vô hiệu hóa, khóa tài khoản phải hiển thị dialog xác nhận với mô tả rõ hậu quả trước khi thực thi.
+175: [normal] Phản hồi tức thì: Sau khi người dùng thực hiện thao tác thành công (lưu, cập nhật, xóa), hệ thống phải hiển thị thông báo xác nhận trong vòng 1 giây.
+176: [normal] Giao diện nhất quán: Các nút hành động (Lưu, Hủy, Xóa, Tìm kiếm) phải có vị trí, màu sắc và tên gọi nhất quán trên toàn bộ các màn hình của hệ thống. Nút hủy / quay lại luôn phải có mặt để người dùng thoát khỏi thao tác đang thực hiện.
+177: [normal] Hỗ trợ tìm kiếm nhanh: Các màn hình danh sách (hội viên, thiết bị, gói tập) phải có thanh tìm kiếm và hỗ trợ lọc theo ít nhất 2 tiêu chí để người dùng nhanh chóng tìm thấy thông tin cần thiết.
+178: [Heading 2] Các yêu cầu khác
+179: [normal] <Mô tả các yêu cầu khác tại đây, trên mục này có thể thêm các đặc tính chất lượng khác như Hiệu năng – Efficiency/Performance, Tính tin cậy – Reliability, Tính dễ bảo trì – Maintainability, Tính khả chuyển – Portability, Yêu cầu về an toàn bảo mật, Yêu cầu về giao diện,…>
