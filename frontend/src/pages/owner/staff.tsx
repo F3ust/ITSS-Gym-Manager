@@ -12,7 +12,7 @@ export default function StaffPage() {
   const [staff, setStaff] = useState<Staff[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
-  const [form, setForm] = useState({ fullName: '', roleTitle: '' })
+  const [form, setForm] = useState({ fullName: '', roleTitle: '', username: '', password: '' })
 
   useEffect(() => { load() }, [])
 
@@ -30,7 +30,7 @@ export default function StaffPage() {
     e.preventDefault()
     await apiPost('/staff', form)
     setShowForm(false)
-    setForm({ fullName: '', roleTitle: '' })
+    setForm({ fullName: '', roleTitle: '', username: '', password: '' })
     load()
   }
 
@@ -52,6 +52,10 @@ export default function StaffPage() {
               <input value={form.fullName} onChange={(e) => setForm(f => ({ ...f, fullName: e.target.value }))} required />
               <label>Role Title *</label>
               <input value={form.roleTitle} onChange={(e) => setForm(f => ({ ...f, roleTitle: e.target.value }))} required />
+              <label>Username (Phone) *</label>
+              <input value={form.username} onChange={(e) => setForm(f => ({ ...f, username: e.target.value }))} placeholder="10-digit phone number" required />
+              <label>Password *</label>
+              <input type="password" value={form.password} onChange={(e) => setForm(f => ({ ...f, password: e.target.value }))} placeholder="8+ chars, letters + numbers" required />
               <div className="modal-actions">
                 <button type="button" className="btn-secondary" onClick={() => setShowForm(false)}>Cancel</button>
                 <button type="submit" className="btn-primary">Create</button>

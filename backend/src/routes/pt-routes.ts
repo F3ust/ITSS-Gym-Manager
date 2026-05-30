@@ -1,8 +1,59 @@
 import { Router } from 'express'
+import { randomBytes, scryptSync } from 'crypto'
 import pool from '../db/pool'
 import { query } from '../db/query'
+import { requireRole } from '../middlewares/auth-middleware'
+
+function hashPassword(password: string): string {
+  const salt = randomBytes(16).toString('hex')
+  const hash = scryptSync(password, salt, 64).toString('hex')
+  return `${salt}:${hash}`
+}
 
 const router = Router()
+
+router.post('/', requireRole(['Owner']), async (req, res, next) => {
+  const client = await pool.connect()
+  try {
+    const { fullName, bio, username, password } = req.body
+    if (!fullName || !username || !password) {
+      return res.status(400).json({ code: 'ERR_VALIDATION', message: 'Full name, username, and password are required' })
+    }
+    if (!/^\d{10}$/.test(username)) {
+      return res.status(400).json({ code: 'ERR_VALIDATION', message: 'Username must be 10 digits' })
+    }
+    if (password.length < 8 || !/[a-zA-Z]/.test(password) || !/\d/.test(password)) {
+      return res.status(400).json({ code: 'ERR_VALIDATION', message: 'Password must be 8+ chars with letters and numbers' })
+    }
+    const existing = await query('SELECT id FROM users WHERE username = $1', [username])
+    if (existing.rows[0]) {
+      return res.status(409).json({ code: 'ERR_DUPLICATE', message: 'Username already exists' })
+    }
+    await client.query('BEGIN')
+    const hashed = hashPassword(password)
+    const userResult = await client.query(
+      'INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING id',
+      [username, hashed]
+    )
+    const userId = userResult.rows[0].id
+    let roleId = (await client.query("SELECT id FROM roles WHERE name = 'PT'")).rows[0]?.id
+    if (!roleId) {
+      roleId = (await client.query("INSERT INTO roles (name) VALUES ('PT') RETURNING id")).rows[0].id
+    }
+    await client.query('INSERT INTO user_roles (user_id, role_id) VALUES ($1, $2)', [userId, roleId])
+    const ptResult = await client.query(
+      'INSERT INTO pt_profiles (user_id, full_name, bio) VALUES ($1, $2, $3) RETURNING *',
+      [userId, fullName, bio || null]
+    )
+    await client.query('COMMIT')
+    res.status(201).json(ptResult.rows[0])
+  } catch (err) {
+    try { await client.query('ROLLBACK') } catch { /* */ }
+    next({ status: 500, code: 'ERR_PT_CREATE', message: 'Failed to create PT', details: { error: String(err) } })
+  } finally {
+    client.release()
+  }
+})
 
 router.get('/profiles', async (_req, res, next) => {
   try {

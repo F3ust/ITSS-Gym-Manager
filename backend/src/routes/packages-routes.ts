@@ -57,7 +57,7 @@ router.get('/:id', async (req, res, next) => {
 
 router.patch('/:id', async (req, res, next) => {
   try {
-    const { name, durationDays, price, category, description, sessionCount, ptSessionCount, status } = req.body
+    const { name, durationDays, price, category, description, sessionCount, ptSessionCount, status, confirmPriceChange } = req.body
     if (sessionCount !== undefined && sessionCount !== null) {
       const sCount = Number(sessionCount)
       if (!Number.isInteger(sCount) || sCount <= 0) {
@@ -68,6 +68,20 @@ router.patch('/:id', async (req, res, next) => {
       const psCount = Number(ptSessionCount)
       if (!Number.isInteger(psCount) || psCount <= 0) {
         return res.status(400).json({ code: 'ERR_VALIDATION', message: 'ptSessionCount must be a positive integer' })
+      }
+    }
+    if (price !== undefined && price !== null && price !== '' && !confirmPriceChange) {
+      const existing = await query('SELECT price FROM packages WHERE id = $1', [req.params.id])
+      if (existing.rows[0] && Number(price) !== existing.rows[0].price) {
+        const countResult = await query(
+          `SELECT COUNT(DISTINCT member_id)::int AS count FROM subscriptions
+           WHERE package_id = $1 AND status = 'active' AND end_date >= CURRENT_DATE`,
+          [req.params.id]
+        )
+        const activeCount = countResult.rows[0]?.count || 0
+        if (activeCount >= 50) {
+          return res.status(409).json({ code: 'ERR_PRICE_CHANGE_WARNING', message: 'Price change blocked', details: { activeCount } })
+        }
       }
     }
     const result = await query(

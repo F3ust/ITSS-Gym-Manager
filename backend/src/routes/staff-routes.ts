@@ -1,6 +1,14 @@
 import { Router } from 'express'
+import { randomBytes, scryptSync } from 'crypto'
+import pool from '../db/pool'
 import { query } from '../db/query'
 import { requireRole } from '../middlewares/auth-middleware'
+
+function hashPassword(password: string): string {
+  const salt = randomBytes(16).toString('hex')
+  const hash = scryptSync(password, salt, 64).toString('hex')
+  return `${salt}:${hash}`
+}
 
 const router = Router()
 
@@ -108,19 +116,46 @@ router.delete('/:id', async (req, res, next) => {
   }
 })
 
-router.post('/', async (req, res, next) => {
+router.post('/', requireRole(['Owner']), async (req, res, next) => {
+  const client = await pool.connect()
   try {
-    const { fullName, roleTitle } = req.body
-    if (!fullName || !roleTitle) {
-      return res.status(400).json({ code: 'ERR_VALIDATION', message: 'Missing required fields' })
+    const { fullName, roleTitle, username, password } = req.body
+    if (!fullName || !roleTitle || !username || !password) {
+      return res.status(400).json({ code: 'ERR_VALIDATION', message: 'Full name, role title, username, and password are required' })
     }
-    const result = await query(
-      'INSERT INTO staff (full_name, role_title) VALUES ($1,$2) RETURNING *',
-      [fullName, roleTitle]
+    if (!/^\d{10}$/.test(username)) {
+      return res.status(400).json({ code: 'ERR_VALIDATION', message: 'Username must be 10 digits' })
+    }
+    if (password.length < 8 || !/[a-zA-Z]/.test(password) || !/\d/.test(password)) {
+      return res.status(400).json({ code: 'ERR_VALIDATION', message: 'Password must be 8+ chars with letters and numbers' })
+    }
+    const existing = await query('SELECT id FROM users WHERE username = $1', [username])
+    if (existing.rows[0]) {
+      return res.status(409).json({ code: 'ERR_DUPLICATE', message: 'Username already exists' })
+    }
+    await client.query('BEGIN')
+    const hashed = hashPassword(password)
+    const userResult = await client.query(
+      'INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING id',
+      [username, hashed]
     )
-    res.status(201).json(result.rows[0])
+    const userId = userResult.rows[0].id
+    let roleId = (await client.query("SELECT id FROM roles WHERE name = 'Staff'")).rows[0]?.id
+    if (!roleId) {
+      roleId = (await client.query("INSERT INTO roles (name) VALUES ('Staff') RETURNING id")).rows[0].id
+    }
+    await client.query('INSERT INTO user_roles (user_id, role_id) VALUES ($1, $2)', [userId, roleId])
+    const staffResult = await client.query(
+      'INSERT INTO staff (user_id, full_name, role_title) VALUES ($1, $2, $3) RETURNING *',
+      [userId, fullName, roleTitle]
+    )
+    await client.query('COMMIT')
+    res.status(201).json(staffResult.rows[0])
   } catch (err) {
+    try { await client.query('ROLLBACK') } catch { /* */ }
     next({ status: 500, code: 'ERR_STAFF_CREATE', message: 'Failed to create staff', details: { error: String(err) } })
+  } finally {
+    client.release()
   }
 })
 

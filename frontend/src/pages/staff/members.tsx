@@ -18,6 +18,7 @@ export default function StaffMembersPage() {
   const [query, setQuery] = useState('')
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState({ fullName: '', phone: '', email: '', dob: '', job: '', memberType: 'regular' })
+  const [dobError, setDobError] = useState('')
 
   const load = useCallback(async (search?: string) => {
     const data = search
@@ -33,11 +34,31 @@ export default function StaffMembersPage() {
     load(query)
   }
 
+  function validateDob(dob: string): boolean {
+    if (!dob) { setDobError('Date of birth is required'); return false }
+    const dobDate = new Date(dob)
+    const today = new Date()
+    let age = today.getFullYear() - dobDate.getFullYear()
+    const mDiff = today.getMonth() - dobDate.getMonth()
+    if (mDiff < 0 || (mDiff === 0 && today.getDate() < dobDate.getDate())) age--
+    if (age < 16) { setDobError('Member must be at least 16 years old'); return false }
+    setDobError('')
+    return true
+  }
+
+  function handleDobChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setForm(f => ({ ...f, dob: e.target.value }))
+    if (e.target.value) validateDob(e.target.value)
+    else setDobError('')
+  }
+
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault()
+    if (!validateDob(form.dob)) return
     await apiPost('/members', form)
     setShowForm(false)
     setForm({ fullName: '', phone: '', email: '', dob: '', job: '', memberType: 'regular' })
+    setDobError('')
     load()
   }
 
@@ -65,7 +86,8 @@ export default function StaffMembersPage() {
               <label>Email</label>
               <input type="email" value={form.email} onChange={(e) => setForm(f => ({ ...f, email: e.target.value }))} />
               <label>Date of Birth *</label>
-              <input type="date" value={form.dob} onChange={(e) => setForm(f => ({ ...f, dob: e.target.value }))} required />
+              <input type="date" value={form.dob} onChange={handleDobChange} required />
+              {dobError && <p style={{ color: '#d32f2f', fontSize: 13, margin: '4px 0 0' }}>{dobError}</p>}
               <label>Job *</label>
               <input value={form.job} onChange={(e) => setForm(f => ({ ...f, job: e.target.value }))} required />
               <label>Member Type</label>

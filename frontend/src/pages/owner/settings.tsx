@@ -3,7 +3,7 @@ import { apiGet, apiPatch, apiPut } from '../../api/client'
 
 interface User { id: string; username: string; status: string; created_at: string; role: string }
 interface Role { id: string; name: string }
-interface AuditLog { id: string; created_at: string; user_id: string; action: string; details: string }
+interface AuditLog { id: string; created_at: string; user_id: string; username: string | null; action: string; details: string }
 interface GymProfile { id: string; name: string; address: string; phone: string; email: string; open_hours: string }
 
 export default function SettingsPage() {
@@ -163,14 +163,16 @@ export default function SettingsPage() {
             ? <p className="text-muted">No audit logs available.</p>
             : (
               <table className="data-table">
-                <thead><tr><th>Timestamp</th><th>User ID</th><th>Action</th><th>Details</th></tr></thead>
+                <thead><tr><th>Time</th><th>User</th><th>Action</th><th>Details</th></tr></thead>
                 <tbody>
                   {logs.map(l => (
                     <tr key={l.id}>
                       <td>{new Date(l.created_at).toLocaleString()}</td>
-                      <td>{l.user_id}</td>
-                      <td>{l.action}</td>
-                      <td>{l.details}</td>
+                      <td>{l.username || l.user_id || '-'}</td>
+                      <td><span className="badge">{l.action}</span></td>
+                      <td style={{ maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {l.details || '-'}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

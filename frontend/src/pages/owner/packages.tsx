@@ -22,6 +22,7 @@ export default function PackagesPage() {
   const [editId, setEditId] = useState<string | null>(null)
   const [form, setForm] = useState({ name: '', duration_days: '', price: '', category: 'membership', description: '', session_count: '', pt_session_count: '' })
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
+  const [priceWarning, setPriceWarning] = useState<{ count: number; pendingBody: Record<string, unknown> } | null>(null)
 
   useEffect(() => { load() }, [])
 
@@ -55,7 +56,7 @@ export default function PackagesPage() {
     setShowForm(true)
   }
 
-  async function handleSave(e: React.FormEvent) {
+  async function handleSave(e: React.FormEvent, confirmed = false) {
     e.preventDefault()
     const body = {
       name: form.name,
@@ -64,12 +65,31 @@ export default function PackagesPage() {
       category: form.category,
       description: form.description || undefined,
       sessionCount: form.session_count ? Number(form.session_count) : null,
+      ...(confirmed ? { confirmPriceChange: true } : {}),
     }
     if (editId) {
-      await apiPatch(`/packages/${editId}`, body)
+      try {
+        await apiPatch(`/packages/${editId}`, body)
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : ''
+        const details = (err as Error & { details?: { activeCount?: number } }).details
+        if (msg.includes('ERR_PRICE_CHANGE_WARNING') || msg.includes('active members')) {
+          setPriceWarning({ count: details?.activeCount ?? 0, pendingBody: body })
+          return
+        }
+        throw err
+      }
     } else {
       await apiPost('/packages', body)
     }
+    setShowForm(false)
+    load()
+  }
+
+  async function confirmPriceUpdate() {
+    if (!priceWarning || !editId) return
+    await apiPatch(`/packages/${editId}`, { ...priceWarning.pendingBody, confirmPriceChange: true })
+    setPriceWarning(null)
     setShowForm(false)
     load()
   }
@@ -129,6 +149,19 @@ export default function PackagesPage() {
             <div className="modal-actions">
               <button className="btn-secondary" onClick={() => setConfirmDelete(null)}>Cancel</button>
               <button className="btn-danger" onClick={() => handleDeactivate(confirmDelete)}>Deactivate</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {priceWarning && (
+        <div className="modal-overlay" onClick={() => setPriceWarning(null)}>
+          <div className="modal modal-sm" onClick={(e) => e.stopPropagation()}>
+            <h3>Price Change Warning</h3>
+            <p>There are <strong>{priceWarning.count} active members</strong> using this package. Are you sure you want to change the price?</p>
+            <div className="modal-actions">
+              <button className="btn-secondary" onClick={() => setPriceWarning(null)}>Cancel</button>
+              <button className="btn-primary" onClick={confirmPriceUpdate}>Yes, Update</button>
             </div>
           </div>
         </div>

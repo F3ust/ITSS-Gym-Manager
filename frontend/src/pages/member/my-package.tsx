@@ -64,13 +64,18 @@ export default function MyPackagePage() {
                 {Math.ceil((new Date(activeSub.end_date).getTime() - Date.now()) / 86400000)}
               </span>
             </div>
-            {Math.ceil((new Date(activeSub.end_date).getTime() - Date.now()) / 86400000) <= 7 && (
-              <div className="detail-row" style={{ borderBottom: 'none', paddingTop: 4 }}>
-                <button className="btn-primary" style={{ width: '100%', padding: '10px' }} onClick={() => navigate('/member/register-package')}>
-                  Renew Now
-                </button>
-              </div>
-            )}
+            {(() => {
+              const daysLeft = Math.ceil((new Date(activeSub.end_date).getTime() - Date.now()) / 86400000)
+              const sessionsLow = activeSub.remaining_sessions !== null && activeSub.remaining_sessions <= 5
+              const ptSessionsLow = activeSub.remaining_pt_sessions !== null && activeSub.remaining_pt_sessions <= 5
+              return (daysLeft <= 7 || sessionsLow || ptSessionsLow) && (
+                <div className="detail-row" style={{ borderBottom: 'none', paddingTop: 4 }}>
+                  <button className="btn-primary" style={{ width: '100%', padding: '10px' }} onClick={() => navigate('/member/register-package')}>
+                    Renew Now
+                  </button>
+                </div>
+              )
+            })()}
           </div>
         </>
       )}

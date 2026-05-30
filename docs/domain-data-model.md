@@ -31,6 +31,7 @@ This document outlines the core entities and relationships for the gym managemen
 - feedback_responses: staff responses and status updates.
 - member_notifications: notifications pushed to members on relevant events.
 - reports: generated report snapshots.
+- audit_logs: system audit trail for security-relevant actions (login, payments, role/status changes, member updates).
 
 ## Key Fields (High-Level)
 
@@ -49,6 +50,7 @@ This document outlines the core entities and relationships for the gym managemen
 - staff_performance_metrics: id, staff_id, period_start, period_end, metric_name, metric_value.
 - pt_schedules: id, pt_id, member_id, start_at, end_at, workout_type, status.
 - workout_logs: id, member_id, pt_id, workout_date, duration_min, intensity, notes, rating.
+- audit_logs: id, user_id, action (TEXT), details (JSONB), created_at.
 
 ## Relationships
 
@@ -65,8 +67,10 @@ This document outlines the core entities and relationships for the gym managemen
 - members 1..n feedback; feedback 1..n feedback_responses.
 - gym_profile: singleton table (single row, no FK).
 - members 1..n member_notifications.
+- users 1..n audit_logs (user_id nullable via ON DELETE SET NULL).
 
 ## Notes
 
 - Store fingerprint data as encrypted blob or hash; never store raw scans.
 - Use soft delete for packages and other entities with history requirements.
+- Audit logs are written via the `logAudit` utility (`utils/audit-logger.ts`). The `user_id` is nullable for anonymous/system actions.

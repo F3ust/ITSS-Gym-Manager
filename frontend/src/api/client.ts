@@ -43,7 +43,9 @@ export async function apiPatch<T = unknown>(path: string, body: unknown): Promis
   })
   if (!res.ok) {
     const data = await res.json().catch(() => ({}))
-    throw new Error(data.message || `PATCH ${path} failed`)
+    const err = new Error(data.message || `PATCH ${path} failed`)
+    ;(err as Error & { details?: unknown }).details = data.details
+    throw err
   }
   return res.json()
 }

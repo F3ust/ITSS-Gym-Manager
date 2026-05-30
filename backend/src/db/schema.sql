@@ -224,4 +224,13 @@ INSERT INTO gym_profile (name, address, phone, email, open_hours)
 SELECT 'My Gym', '123 Main St', '0123456789', 'info@mygym.com', 'Mon-Sun 6:00-22:00'
 WHERE NOT EXISTS (SELECT 1 FROM gym_profile);
 
+CREATE TABLE IF NOT EXISTS audit_logs (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  action TEXT NOT NULL,
+  details JSONB,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_audit_logs_created ON audit_logs(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_member_notifications_member ON member_notifications(member_id, created_at DESC);

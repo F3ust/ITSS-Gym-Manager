@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { randomBytes, scryptSync, timingSafeEqual } from 'crypto'
 import { query } from '../db/query'
+import { logAudit } from '../utils/audit-logger'
 
 const router = Router()
 
@@ -55,6 +56,7 @@ router.post('/login', async (req, res, next) => {
     )
     const role = roleResult.rows[0]?.name || 'Member'
     const name = await getUserDisplayName(user.id, role) || user.username
+    logAudit(user.id, 'login', { role: role.toLowerCase() })
     res.json({ token: user.id, user: { id: user.id, name, role: role.toLowerCase() } })
   } catch (err) {
     next({ status: 500, code: 'ERR_AUTH_LOGIN', message: 'Login failed', details: { error: String(err) } })

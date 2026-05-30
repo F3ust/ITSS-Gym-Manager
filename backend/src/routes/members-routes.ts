@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { query } from '../db/query'
 import { requireRole } from '../middlewares/auth-middleware'
+import { logAudit } from '../utils/audit-logger'
 
 const router = Router()
 
@@ -9,6 +10,17 @@ router.post('/', async (req, res, next) => {
     const { fullName, email, phone, avatarUrl, dob, job, memberType, fingerprintHash } = req.body
     if (!fullName || !phone || !dob || !job || !memberType) {
       return res.status(400).json({ code: 'ERR_VALIDATION', message: 'Missing required fields' })
+    }
+    const dobDate = new Date(dob)
+    if (isNaN(dobDate.getTime())) {
+      return res.status(400).json({ code: 'ERR_VALIDATION', message: 'Invalid date of birth' })
+    }
+    const today = new Date()
+    let age = today.getFullYear() - dobDate.getFullYear()
+    const mDiff = today.getMonth() - dobDate.getMonth()
+    if (mDiff < 0 || (mDiff === 0 && today.getDate() < dobDate.getDate())) age--
+    if (age < 16) {
+      return res.status(400).json({ code: 'ERR_VALIDATION', message: 'You must be at least 16 years old to register' })
     }
     const result = await query(
       'INSERT INTO members (full_name, email, phone, avatar_url, dob, job, member_type, fingerprint_hash) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *',
@@ -117,6 +129,7 @@ router.patch('/:id', async (req, res, next) => {
     if (!result.rows[0]) {
       return res.status(404).json({ code: 'ERR_NOT_FOUND', message: 'Member not found' })
     }
+    logAudit(result.rows[0].user_id, 'member_update', { memberId: req.params.id })
     res.json(result.rows[0])
   } catch (err) {
     next({ status: 500, code: 'ERR_MEMBER_UPDATE', message: 'Failed to update member', details: { error: String(err) } })

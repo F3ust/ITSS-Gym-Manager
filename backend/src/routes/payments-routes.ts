@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import type { PoolClient } from 'pg'
 import pool from '../db/pool'
+import { logAudit } from '../utils/audit-logger'
 
 const router = Router()
 
@@ -60,6 +61,7 @@ router.post('/', async (req, res, next) => {
       [paymentResult.rows[0].id]
     )
     await client.query('COMMIT')
+    logAudit(null, 'payment', { subscriptionId, amount: amountValue, method: methodValue })
     res.status(201).json({
       subscription: subscriptionResult.rows[0],
       payment: paymentResult.rows[0],

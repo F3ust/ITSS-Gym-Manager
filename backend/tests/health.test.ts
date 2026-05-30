@@ -23,3 +23,11 @@ describe('gym profile', () => {
     expect(response.body.code).toBe('ERR_VALIDATION')
   })
 })
+
+describe('audit logs', () => {
+  it('returns audit logs array', async () => {
+    const response = await request(app).get('/api/roles/audit-logs').set('x-role', 'Owner')
+    expect(response.status).toBe(200)
+    expect(Array.isArray(response.body)).toBe(true)
+  })
+})

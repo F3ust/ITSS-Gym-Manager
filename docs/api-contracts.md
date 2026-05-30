@@ -13,6 +13,7 @@ This document lists the initial REST API surface for the gym management system.
 ## Members
 
 - POST /api/members
+  - Validates age ≥ 16 (server-side).
 - GET /api/members?query=...&status=...
 - GET /api/members/{id}
 - PATCH /api/members/{id} (phone change allowed without verification; UI must warn)
@@ -23,7 +24,7 @@ This document lists the initial REST API surface for the gym management system.
   - Payload accepts optional `sessionCount` (integer > 0). Either `durationDays` or `sessionCount` must be provided.
 - GET /api/packages?status=active
 - GET /api/packages/{id}
-- PATCH /api/packages/{id} (requires confirmPriceChange when activeMembersCount is high; supports `sessionCount` update)
+- PATCH /api/packages/{id} (requires confirmPriceChange when activeMembersCount is high; returns ERR_PRICE_CHANGE_WARNING if activeMembersCount ≥ 50; supports `sessionCount` update)
 - DELETE /api/packages/{id}  (soft delete)
 
 ## Subscriptions And Payments
@@ -73,8 +74,11 @@ This document lists the initial REST API surface for the gym management system.
 ## Staff And Roles
 
 - POST /api/staff
+  - Payload includes `username` and `password` fields to create a login account (users + user_roles) in a transaction.
 - PATCH /api/staff/{id}
 - POST /api/roles/assign
+- GET /api/roles/audit-logs (Owner-only)
+  - Returns audit log entries (audit_logs table) with username, action, timestamp, etc.
 - GET /api/staff/schedules (Owner-only)
 - POST /api/staff/schedules (Owner-only)
 - PATCH /api/staff/schedules/{id} (Owner-only)
@@ -82,6 +86,8 @@ This document lists the initial REST API surface for the gym management system.
 
 ## PT Workflows
 
+- POST /api/pt
+  - Payload includes `username` and `password` fields to create a login account (users + user_roles) in a transaction.
 - GET /api/pt/assignments
 - POST /api/pt/assignments
 - POST /api/pt/schedules (409 ERR_SCHEDULE_CONFLICT)
