@@ -13,7 +13,6 @@ export default function SettingsPage() {
   const [logs, setLogs] = useState<AuditLog[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
-  const [gymProfile, setGymProfile] = useState<GymProfile | null>(null)
   const [gymForm, setGymForm] = useState({ name: '', address: '', phone: '', email: '', open_hours: '' })
   const [gymSaving, setGymSaving] = useState(false)
   const [gymMessage, setGymMessage] = useState('')
@@ -27,7 +26,6 @@ export default function SettingsPage() {
     try { setLogs(await apiGet<AuditLog[]>('/roles/audit-logs')) } catch { /* */ }
     try {
       const gp = await apiGet<GymProfile>('/gym-profile')
-      setGymProfile(gp)
       if (gp) setGymForm({ name: gp.name, address: gp.address, phone: gp.phone, email: gp.email || '', open_hours: gp.open_hours || '' })
     } catch { /* */ }
     setLoading(false)
@@ -38,8 +36,7 @@ export default function SettingsPage() {
     setGymMessage('')
     setGymSaving(true)
     try {
-      const updated = await apiPut<GymProfile>('/gym-profile', gymForm)
-      setGymProfile(updated)
+      await apiPut<GymProfile>('/gym-profile', gymForm)
       setGymMessage('Gym profile updated successfully')
     } catch (err) {
       setGymMessage(err instanceof Error ? err.message : 'Failed to update')
