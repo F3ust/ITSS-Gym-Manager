@@ -122,7 +122,7 @@ GitNexus indexes this repo's call graph. Use it instead of blind grep, and **alw
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **ITSS-Gym-Manager** (962 symbols, 1630 relationships, 69 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **ITSS-Gym-Manager** (1041 symbols, 1718 relationships, 69 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 
