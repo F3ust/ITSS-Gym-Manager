@@ -1,8 +1,10 @@
 import { Router } from 'express'
 import { randomBytes, scryptSync, timingSafeEqual } from 'crypto'
+import jwt from 'jsonwebtoken'
 import { query } from '../db/query'
 import { logAudit } from '../utils/audit-logger'
 
+const JWT_SECRET = process.env.JWT_SECRET || 'fallback-gym-secret'
 const router = Router()
 
 function hashPassword(password: string): string {
@@ -57,7 +59,8 @@ router.post('/login', async (req, res, next) => {
     const role = roleResult.rows[0]?.name || 'Member'
     const name = await getUserDisplayName(user.id, role) || user.username
     logAudit(user.id, 'login', { role: role.toLowerCase() })
-    res.json({ token: user.id, user: { id: user.id, name, role: role.toLowerCase() } })
+    const token = jwt.sign({ userId: user.id, role }, JWT_SECRET, { expiresIn: '7d' })
+    res.json({ token, user: { id: user.id, name, role: role.toLowerCase() } })
   } catch (err) {
     next({ status: 500, code: 'ERR_AUTH_LOGIN', message: 'Login failed', details: { error: String(err) } })
   }
@@ -111,8 +114,9 @@ router.post('/register', async (req, res, next) => {
       'INSERT INTO members (user_id, full_name, phone, dob, job, member_type, status) VALUES ($1, $2, $3, $4, $5, $6, $7)',
       [userId, name, phone, dobDate.toISOString().split('T')[0], 'N/A', 'regular', 'active']
     )
+    const token = jwt.sign({ userId, role: 'Member' }, JWT_SECRET, { expiresIn: '7d' })
     res.status(201).json({
-      token: userId,
+      token,
       user: { id: userId, name, role: 'member' }
     })
   } catch (err) {
