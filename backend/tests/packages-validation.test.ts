@@ -8,9 +8,9 @@ describe('packages validation', () => {
     expect(response.body.code).toBe('ERR_VALIDATION')
   })
 
-  it('rejects if both durationDays and sessionCount are missing', async () => {
+  it('rejects if durationDays is missing for membership package', async () => {
     const response = await request(app).post('/api/packages').send({
-      name: 'Test Package No Dur No Sess',
+      name: 'Test Package No Dur',
       price: 100000,
       category: 'membership'
     })
@@ -18,13 +18,12 @@ describe('packages validation', () => {
     expect(response.body.code).toBe('ERR_VALIDATION')
   })
 
-  it('rejects invalid sessionCount', async () => {
+  it('rejects invalid category', async () => {
     const response = await request(app).post('/api/packages').send({
-      name: 'Test Package Invalid Sess',
+      name: 'Test Package Invalid Category',
       price: 100000,
-      category: 'membership',
-      durationDays: 30,
-      sessionCount: -5
+      category: 'invalid_category',
+      durationDays: 30
     })
     expect(response.status).toBe(400)
     expect(response.body.code).toBe('ERR_VALIDATION')
@@ -42,33 +41,31 @@ describe('packages validation', () => {
     expect(response.body.code).toBe('ERR_VALIDATION')
   })
 
-  it('successfully creates a valid session-based package', async () => {
-    const uniqueName = `Session PT Package ${Date.now()}`
+  it('successfully creates a valid PT package', async () => {
+    const uniqueName = `PT Package ${Date.now()}`
     const response = await request(app).post('/api/packages').send({
       name: uniqueName,
       price: 1500000,
       category: 'pt',
-      durationDays: 60,
-      sessionCount: 15,
-      description: '15 sessions package test'
+      ptSessionCount: 15,
+      description: '15 PT sessions package test'
     })
     expect(response.status).toBe(201)
     expect(response.body.name).toBe(uniqueName)
-    expect(response.body.session_count).toBe(15)
+    expect(response.body.pt_session_count).toBe(15)
   })
 
-  it('successfully creates package with sessionCount and ptSessionCount', async () => {
-    const uniqueName = `Full PT Package ${Date.now()}`
+  it('successfully creates a valid combo package', async () => {
+    const uniqueName = `Combo Package ${Date.now()}`
     const response = await request(app).post('/api/packages').send({
       name: uniqueName,
       price: 2500000,
-      category: 'pt',
+      category: 'combo',
       durationDays: 60,
-      sessionCount: 15,
       ptSessionCount: 5
     })
     expect(response.status).toBe(201)
-    expect(response.body.session_count).toBe(15)
+    expect(response.body.duration_days).toBe(60)
     expect(response.body.pt_session_count).toBe(5)
   })
 })

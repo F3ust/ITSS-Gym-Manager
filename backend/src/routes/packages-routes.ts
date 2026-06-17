@@ -9,8 +9,17 @@ router.post('/', async (req, res, next) => {
     if (!name || !price || !category) {
       return res.status(400).json({ code: 'ERR_VALIDATION', message: 'Missing required fields' })
     }
-    if (!durationDays && !sessionCount) {
-      return res.status(400).json({ code: 'ERR_VALIDATION', message: 'Either durationDays or sessionCount must be provided' })
+    if (category !== 'membership' && category !== 'pt' && category !== 'combo') {
+      return res.status(400).json({ code: 'ERR_VALIDATION', message: 'Invalid category' })
+    }
+    if (category === 'membership' && !durationDays) {
+      return res.status(400).json({ code: 'ERR_VALIDATION', message: 'durationDays is required for membership packages' })
+    }
+    if (category === 'pt' && !ptSessionCount) {
+      return res.status(400).json({ code: 'ERR_VALIDATION', message: 'ptSessionCount is required for PT packages' })
+    }
+    if (category === 'combo' && (!durationDays || !ptSessionCount)) {
+      return res.status(400).json({ code: 'ERR_VALIDATION', message: 'Both durationDays and ptSessionCount are required for combo packages' })
     }
     if (sessionCount !== undefined && sessionCount !== null) {
       const sCount = Number(sessionCount)
@@ -58,6 +67,11 @@ router.get('/:id', async (req, res, next) => {
 router.patch('/:id', async (req, res, next) => {
   try {
     const { name, durationDays, price, category, description, sessionCount, ptSessionCount, status, confirmPriceChange } = req.body
+    if (category !== undefined && category !== null) {
+      if (category !== 'membership' && category !== 'pt' && category !== 'combo') {
+        return res.status(400).json({ code: 'ERR_VALIDATION', message: 'Invalid category' })
+      }
+    }
     if (sessionCount !== undefined && sessionCount !== null) {
       const sCount = Number(sessionCount)
       if (!Number.isInteger(sCount) || sCount <= 0) {

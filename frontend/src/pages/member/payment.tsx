@@ -73,7 +73,7 @@ export default function MemberPaymentPage() {
       <div className="card" style={{ padding: 24 }}>
         {done ? (
           <div style={{ textAlign: 'center', padding: '24px 0' }}>
-            <p style={{ color: '#2e7d32', fontSize: 16, fontWeight: 600, marginBottom: 16 }}>{message}</p>
+            <p style={{ color: '#15803d', fontSize: 16, fontWeight: 600, marginBottom: 16 }}>{message}</p>
             <button className="btn-primary" onClick={() => navigate('/member/my-package')}>
               View My Package
             </button>
@@ -81,7 +81,7 @@ export default function MemberPaymentPage() {
         ) : (
           <form onSubmit={handlePay} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             {/* Order Summary */}
-            <div style={{ background: '#F8FAFC', border: '1px solid var(--stroke)', borderRadius: 12, padding: 16 }}>
+            <div style={{ background: 'var(--bg)', border: '1px solid var(--stroke)', borderRadius: 12, padding: 16 }}>
               <h3 style={{ fontSize: 15, margin: '0 0 12px', fontWeight: 600 }}>Order Summary</h3>
               {member && (
                 <div style={{ fontSize: 14, display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -120,8 +120,8 @@ export default function MemberPaymentPage() {
                   onClick={() => setMethod('transfer')}
                   style={{
                     flex: 1, padding: '14px 16px', borderRadius: 12, cursor: 'pointer',
-                    border: `2px solid ${method === 'transfer' ? '#2563EB' : 'var(--stroke)'}`,
-                    background: method === 'transfer' ? '#EFF6FF' : 'var(--bg)',
+                    border: `2px solid ${method === 'transfer' ? 'var(--accent)' : 'var(--stroke)'}`,
+                    background: method === 'transfer' ? 'var(--accent-light)' : 'var(--bg)',
                     color: 'var(--text-strong)', fontSize: 14, fontWeight: method === 'transfer' ? 600 : 400,
                     transition: 'all 0.15s',
                   }}
@@ -133,8 +133,8 @@ export default function MemberPaymentPage() {
                   onClick={() => setMethod('card')}
                   style={{
                     flex: 1, padding: '14px 16px', borderRadius: 12, cursor: 'pointer',
-                    border: `2px solid ${method === 'card' ? '#2563EB' : 'var(--stroke)'}`,
-                    background: method === 'card' ? '#EFF6FF' : 'var(--bg)',
+                    border: `2px solid ${method === 'card' ? 'var(--accent)' : 'var(--stroke)'}`,
+                    background: method === 'card' ? 'var(--accent-light)' : 'var(--bg)',
                     color: 'var(--text-strong)', fontSize: 14, fontWeight: method === 'card' ? 600 : 400,
                     transition: 'all 0.15s',
                   }}
@@ -146,7 +146,7 @@ export default function MemberPaymentPage() {
 
             {/* Bank Transfer Info */}
             {method === 'transfer' && (
-              <div style={{ textAlign: 'center', padding: 20, background: '#F8FAFC', borderRadius: 12, border: '1px solid var(--stroke)' }}>
+              <div style={{ textAlign: 'center', padding: 20, background: 'var(--bg)', borderRadius: 12, border: '1px solid var(--stroke)' }}>
                 <img src="/payment-qr.png" alt="Bank Transfer QR" style={{ width: 200, height: 200, objectFit: 'contain' }} />
                 <p style={{ marginTop: 10, fontSize: 13, color: 'var(--muted)' }}>
                   Transfer the exact amount to:<br />
@@ -159,7 +159,7 @@ export default function MemberPaymentPage() {
 
             {/* Card Info */}
             {method === 'card' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: 16, background: '#F8FAFC', borderRadius: 12, border: '1px solid var(--stroke)' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: 16, background: 'var(--bg)', borderRadius: 12, border: '1px solid var(--stroke)' }}>
                 <input placeholder="Card Number" style={inputStyle} />
                 <div style={{ display: 'flex', gap: 10 }}>
                   <input placeholder="MM/YY" style={{ ...inputStyle, flex: 1 }} />
@@ -169,7 +169,7 @@ export default function MemberPaymentPage() {
               </div>
             )}
 
-            {error && <p style={{ color: '#d32f2f', fontSize: 14 }}>{error}</p>}
+            {error && <p style={{ color: '#ef4444', fontSize: 14 }}>{error}</p>}
 
             <button
               type="submit"

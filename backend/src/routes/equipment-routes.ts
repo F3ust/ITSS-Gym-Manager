@@ -88,6 +88,20 @@ router.get('/', async (_req, res, next) => {
 router.patch('/:id', async (req, res, next) => {
   try {
     const { name, quantity, origin, warrantyUntil, status } = req.body
+    if (status) {
+      const currentRes = await query('SELECT status FROM equipment WHERE id = $1', [req.params.id])
+      if (currentRes.rows[0]) {
+        const currentStatus = currentRes.rows[0].status
+        if (currentStatus === 'maintenance' && status !== 'maintenance') {
+          await query('UPDATE maintenance_logs SET status = $1 WHERE equipment_id = $2 AND status = $3', ['closed', req.params.id, 'open'])
+        } else if (currentStatus !== 'maintenance' && status === 'maintenance') {
+          const openLogRes = await query('SELECT id FROM maintenance_logs WHERE equipment_id = $1 AND status = $2', [req.params.id, 'open'])
+          if (openLogRes.rows.length === 0) {
+            await query('INSERT INTO maintenance_logs (equipment_id, note, status) VALUES ($1,$2,$3)', [req.params.id, 'Status changed to maintenance by Owner', 'open'])
+          }
+        }
+      }
+    }
     const result = await query(
       'UPDATE equipment SET name = COALESCE($1,name), quantity = COALESCE($2,quantity), origin = COALESCE($3,origin), warranty_until = COALESCE($4,warranty_until), status = COALESCE($5,status) WHERE id = $6 RETURNING *',
       [name || null, quantity || null, origin || null, warrantyUntil || null, status || null, req.params.id]
@@ -123,9 +137,26 @@ router.post('/:id/maintenance', async (req, res, next) => {
       'INSERT INTO maintenance_logs (equipment_id, note, status) VALUES ($1,$2,$3) RETURNING *',
       [req.params.id, note, status || 'open']
     )
+    await query('UPDATE equipment SET status = $1 WHERE id = $2', ['maintenance', req.params.id])
     res.status(201).json(result.rows[0])
   } catch (err) {
     next({ status: 500, code: 'ERR_EQUIP_MAINT', message: 'Failed to log maintenance', details: { error: String(err) } })
+  }
+})
+
+router.patch('/maintenance-logs/:logId/resolve', async (req, res, next) => {
+  try {
+    const logId = req.params.logId
+    const logResult = await query('SELECT * FROM maintenance_logs WHERE id = $1', [logId])
+    if (!logResult.rows[0]) {
+      return res.status(404).json({ code: 'ERR_NOT_FOUND', message: 'Maintenance log not found' })
+    }
+    const log = logResult.rows[0]
+    await query('UPDATE maintenance_logs SET status = $1 WHERE id = $2', ['closed', logId])
+    await query('UPDATE equipment SET status = $1 WHERE id = $2', ['active', log.equipment_id])
+    res.json({ message: 'Maintenance completed' })
+  } catch (err) {
+    next({ status: 500, code: 'ERR_MAINT_LOG_RESOLVE', message: 'Failed to resolve maintenance log', details: { error: String(err) } })
   }
 })
 

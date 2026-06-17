@@ -8,40 +8,72 @@ const router = Router()
 router.post('/', async (req, res, next) => {
   try {
     const { memberId, packageId, startDate, endDate, remainingSessions, remainingPtSessions } = req.body
-    if (!memberId || !packageId || !startDate || !endDate) {
+    if (!memberId || !packageId || !startDate) {
       return res.status(400).json({ code: 'ERR_VALIDATION', message: 'Missing required fields' })
     }
-    const pkgResult = await query('SELECT session_count, pt_session_count, duration_days FROM packages WHERE id = $1', [packageId])
+    const pkgResult = await query('SELECT category, session_count, pt_session_count, duration_days FROM packages WHERE id = $1', [packageId])
     const pkg = pkgResult.rows[0]
     if (!pkg) {
       return res.status(404).json({ code: 'ERR_NOT_FOUND', message: 'Package not found' })
     }
+
+    if (pkg.category !== 'pt' && !endDate) {
+      return res.status(400).json({ code: 'ERR_VALIDATION', message: 'Missing required fields' })
+    }
+
     let finalStatus = 'active'
     let finalStartDate = startDate
     let finalEndDate = endDate
-    let finalRemainingSessions = remainingSessions
-    if (finalRemainingSessions === undefined || finalRemainingSessions === null) {
-      finalRemainingSessions = pkg.session_count ?? null
+    let finalRemainingSessions = null
+    if (pkg.category !== 'membership' && pkg.category !== 'combo' && pkg.category !== 'pt') {
+      finalRemainingSessions = remainingSessions !== undefined && remainingSessions !== null ? remainingSessions : (pkg.session_count ?? null)
     }
     let finalRemainingPtSessions = remainingPtSessions
+
     if (finalRemainingPtSessions === undefined || finalRemainingPtSessions === null) {
       finalRemainingPtSessions = pkg.pt_session_count ?? null
     }
-    const activeSub = await query(
-      "SELECT id, end_date FROM subscriptions WHERE member_id = $1 AND status = 'active' AND end_date >= CURRENT_DATE ORDER BY end_date DESC LIMIT 1",
-      [memberId]
-    )
-    if (activeSub.rows[0]) {
-      finalStatus = 'pending'
-      const nextStart = new Date(activeSub.rows[0].end_date)
-      nextStart.setDate(nextStart.getDate() + 1)
-      finalStartDate = nextStart.toISOString().split('T')[0]
-      const nextEnd = new Date(finalStartDate)
-      nextEnd.setDate(nextEnd.getDate() + pkg.duration_days)
-      finalEndDate = nextEnd.toISOString().split('T')[0]
-      finalRemainingSessions = pkg.session_count ?? null
-      finalRemainingPtSessions = pkg.pt_session_count ?? null
+
+    if (pkg.category === 'pt') {
+      finalEndDate = '2099-12-31'
+      finalStatus = 'active'
+    } else {
+      // Calculate end date to ensure it is correct and timezone-safe
+      const d = new Date(startDate)
+      d.setUTCDate(d.getUTCDate() + (pkg.duration_days ?? 30))
+      const year = d.getUTCFullYear()
+      const month = String(d.getUTCMonth() + 1).padStart(2, '0')
+      const day = String(d.getUTCDate()).padStart(2, '0')
+      finalEndDate = `${year}-${month}-${day}`
+
+      // Check overlap with existing active/pending membership/combo subscriptions
+      const overlapResult = await query(
+        `SELECT s.start_date, s.end_date, p.name 
+         FROM subscriptions s
+         JOIN packages p ON s.package_id = p.id
+         WHERE s.member_id = $1
+           AND s.status IN ('active', 'pending')
+           AND p.category IN ('membership', 'combo')
+           AND s.start_date <= $2::date
+           AND $3::date <= s.end_date`,
+        [memberId, finalEndDate, finalStartDate]
+      )
+      if (overlapResult.rows.length > 0) {
+        const overlap = overlapResult.rows[0]
+        return res.status(409).json({
+          code: 'ERR_SUB_OVERLAP',
+          message: `Package dates overlap with existing package "${overlap.name}" (${new Date(overlap.start_date).toLocaleDateString()} - ${new Date(overlap.end_date).toLocaleDateString()})`
+        })
+      }
+
+      const todayStr = new Date().toISOString().split('T')[0]
+      if (finalStartDate > todayStr) {
+        finalStatus = 'pending'
+      } else {
+        finalStatus = 'active'
+      }
     }
+
     const result = await query(
       'INSERT INTO subscriptions (member_id, package_id, start_date, end_date, remaining_sessions, remaining_pt_sessions, status) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *',
       [memberId, packageId, finalStartDate, finalEndDate, finalRemainingSessions, finalRemainingPtSessions, finalStatus]
@@ -56,10 +88,18 @@ async function activatePending() {
   await query("UPDATE subscriptions SET status = 'active' WHERE status = 'pending' AND start_date <= CURRENT_DATE")
 }
 
-router.get('/', async (_req, res, next) => {
+router.get('/', async (req, res, next) => {
   try {
     await activatePending()
-    const result = await query('SELECT * FROM subscriptions ORDER BY end_date ASC')
+    const memberId = String(req.query.memberId || '').trim()
+    let sql = 'SELECT * FROM subscriptions'
+    const params = []
+    if (memberId) {
+      params.push(memberId)
+      sql += ' WHERE member_id = $1'
+    }
+    sql += ' ORDER BY end_date ASC'
+    const result = await query(sql, params)
     res.json(result.rows)
   } catch (err) {
     next({ status: 500, code: 'ERR_SUB_LIST', message: 'Failed to list subscriptions', details: { error: String(err) } })

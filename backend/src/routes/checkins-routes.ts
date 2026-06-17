@@ -25,26 +25,44 @@ router.post('/', async (req, res, next) => {
   try {
     client = await pool.connect()
     await client.query('BEGIN')
-    const subResult = await client.query(
-      'SELECT * FROM subscriptions WHERE member_id = $1 AND status = $2 AND end_date >= CURRENT_DATE ORDER BY end_date DESC LIMIT 1 FOR UPDATE',
-      [memberId, 'active']
-    )
-    const subscription = subResult.rows[0]
-    if (!subscription) {
-      await safeRollback(client)
-      return res.status(400).json({ code: 'ERR_SUB_INACTIVE', message: 'No active subscription' })
-    }
-    let remainingAfter = subscription.remaining_sessions
+    await client.query("UPDATE subscriptions SET status = 'active' WHERE status = 'pending' AND start_date <= CURRENT_DATE")
+
+    let remainingAfter: number | null = null
+
     if (withPt === true) {
-      const ptSessions = subscription.remaining_pt_sessions
-      if (ptSessions === null) {
+      // First, check if the member has ANY active PT/combo subscription at all (even with 0 sessions)
+      const anySubResult = await client.query(
+        `SELECT s.* FROM subscriptions s
+         JOIN packages p ON s.package_id = p.id
+         WHERE s.member_id = $1 
+           AND s.status = $2 
+           AND p.category IN ('pt', 'combo')
+         LIMIT 1`,
+        [memberId, 'active']
+      )
+      if (anySubResult.rows.length === 0) {
         await safeRollback(client)
         return res.status(400).json({ code: 'ERR_NO_PT_SESSIONS', message: 'No PT sessions on this subscription' })
       }
-      if (ptSessions <= 0) {
+
+      // Find oldest active subscription with remaining PT sessions (not checking end_date since it's unlimited)
+      const subResult = await client.query(
+        `SELECT s.* FROM subscriptions s
+         JOIN packages p ON s.package_id = p.id
+         WHERE s.member_id = $1 
+           AND s.status = $2 
+           AND p.category IN ('pt', 'combo')
+           AND s.remaining_pt_sessions > 0
+         ORDER BY s.start_date ASC
+         LIMIT 1 FOR UPDATE`,
+        [memberId, 'active']
+      )
+      const subscription = subResult.rows[0]
+      if (!subscription) {
         await safeRollback(client)
         return res.status(409).json({ code: 'ERR_NO_PT_SESSIONS', message: 'No remaining PT sessions' })
       }
+
       const decrementResult = await client.query(
         'UPDATE subscriptions SET remaining_pt_sessions = remaining_pt_sessions - 1 WHERE id = $1 AND remaining_pt_sessions > 0 RETURNING remaining_pt_sessions',
         [subscription.id]
@@ -54,21 +72,29 @@ router.post('/', async (req, res, next) => {
         return res.status(409).json({ code: 'ERR_NO_PT_SESSIONS', message: 'No remaining PT sessions' })
       }
       remainingAfter = decrementResult.rows[0].remaining_pt_sessions
-    } else if (remainingAfter !== null) {
-      if (remainingAfter <= 0) {
-        await safeRollback(client)
-        return res.status(409).json({ code: 'ERR_NO_SESSIONS', message: 'No remaining sessions' })
-      }
-      const decrementResult = await client.query(
-        'UPDATE subscriptions SET remaining_sessions = remaining_sessions - 1 WHERE id = $1 AND remaining_sessions > 0 RETURNING remaining_sessions',
-        [subscription.id]
+    } else {
+      // Standard check-in (without PT)
+      // Check if there is an active membership or combo subscription covering today
+      const subResult = await client.query(
+        `SELECT s.* FROM subscriptions s
+         JOIN packages p ON s.package_id = p.id
+         WHERE s.member_id = $1 
+           AND s.status = $2 
+           AND p.category IN ('membership', 'combo')
+           AND s.start_date <= CURRENT_DATE 
+           AND s.end_date >= CURRENT_DATE
+         LIMIT 1`,
+        [memberId, 'active']
       )
-      if (!decrementResult.rows[0]) {
+      const subscription = subResult.rows[0]
+      if (!subscription) {
         await safeRollback(client)
-        return res.status(409).json({ code: 'ERR_NO_SESSIONS', message: 'No remaining sessions' })
+        return res.status(400).json({ code: 'ERR_SUB_INACTIVE', message: 'No active subscription' })
       }
-      remainingAfter = decrementResult.rows[0].remaining_sessions
+      
+      remainingAfter = subscription.remaining_sessions
     }
+
     const checkinResult = await client.query(
       'INSERT INTO check_ins (member_id, method, with_pt, remaining_sessions_after) VALUES ($1,$2,$3,$4) RETURNING *',
       [memberId, methodValue, withPt === true, remainingAfter]

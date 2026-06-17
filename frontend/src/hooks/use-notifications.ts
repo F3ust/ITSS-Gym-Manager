@@ -33,14 +33,12 @@ export function pushNotification(icon: string, message: string) {
 
 export function useNotifications(memberId?: string) {
   const [items, setItems] = useState<AppNotification[]>(() => memberId ? [] : loadLocal())
-  const [loaded, setLoaded] = useState(false)
 
   const fetchRemote = useCallback(async () => {
     if (!memberId) return
     try {
       const data = await apiGet<any[]>(`/notifications?memberId=${memberId}`)
       setItems((data || []).map(mapDbRow))
-      setLoaded(true)
     } catch { /* ignore */ }
   }, [memberId])
 

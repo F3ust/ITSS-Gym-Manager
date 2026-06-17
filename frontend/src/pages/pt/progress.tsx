@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { apiGet } from '../../api/client'
+import { useAuth } from '../../contexts/auth-context'
 
 interface Workout {
   id: string; member_id: string; workout_date: string;
@@ -9,20 +10,29 @@ interface Member { id: string; full_name: string }
 interface Assignment { id: string; member_id: string; status: string }
 
 export default function ProgressPage() {
+  const { user } = useAuth()
   const [members, setMembers] = useState<Map<string, Member>>(new Map())
   const [selected, setSelected] = useState('')
   const [workouts, setWorkouts] = useState<Workout[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    Promise.all([
-      apiGet<Assignment[]>('/pt/assignments'),
-      apiGet<Member[]>('/members'),
-    ]).then(([asgn, mems]) => {
-      const memberIds = new Set(asgn.filter((a) => a.status !== 'inactive').map((a) => a.member_id))
-      setMembers(new Map(mems.filter((m: Member) => memberIds.has(m.id)).map((m: Member) => [m.id, m])))
-    }).catch(() => {}).finally(() => setLoading(false))
-  }, [])
+    if (!user) return
+    setLoading(true)
+    apiGet<{ id: string }>('/pt/profile?userId=' + user.id)
+      .then(async (profile) => {
+        if (profile?.id) {
+          const [asgn, mems] = await Promise.all([
+            apiGet<Assignment[]>('/pt/assignments?ptId=' + profile.id),
+            apiGet<Member[]>('/members'),
+          ])
+          const memberIds = new Set(asgn.filter((a) => a.status !== 'inactive').map((a) => a.member_id))
+          setMembers(new Map(mems.filter((m: Member) => memberIds.has(m.id)).map((m: Member) => [m.id, m])))
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [user])
 
   async function loadWorkouts(memberId: string) {
     setSelected(memberId)

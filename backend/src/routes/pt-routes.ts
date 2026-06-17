@@ -104,9 +104,12 @@ router.delete('/assignments/:id', async (req, res, next) => {
   }
 })
 
-router.get('/assignments', async (_req, res, next) => {
+router.get('/assignments', async (req, res, next) => {
   try {
-    const result = await query('SELECT * FROM pt_assignments ORDER BY id')
+    const ptId = String(req.query.ptId || '').trim()
+    const result = ptId
+      ? await query('SELECT * FROM pt_assignments WHERE pt_id = $1 ORDER BY id', [ptId])
+      : await query('SELECT * FROM pt_assignments ORDER BY id')
     res.json(result.rows)
   } catch (err) {
     next({ status: 500, code: 'ERR_PT_ASSIGN_LIST', message: 'Failed to list assignments', details: { error: String(err) } })
@@ -143,10 +146,14 @@ router.get('/schedules/:id', async (req, res, next) => {
 
 router.get('/schedules', async (req, res, next) => {
   try {
-    const date = String(req.query.date || '')
+    const date = String(req.query.date || '').trim()
+    const ptId = String(req.query.ptId || '').trim()
     let sql = 'SELECT ps.*, m.full_name AS member_name FROM pt_schedules ps LEFT JOIN members m ON m.id = ps.member_id'
     const params: string[] = []
-    if (date) { params.push(date); sql += ` WHERE ps.start_at::date = $1` }
+    const clauses: string[] = []
+    if (date) { params.push(date); clauses.push(`ps.start_at::date = $${params.length}`) }
+    if (ptId) { params.push(ptId); clauses.push(`ps.pt_id = $${params.length}`) }
+    if (clauses.length) sql += ' WHERE ' + clauses.join(' AND ')
     sql += ' ORDER BY ps.start_at ASC'
     const result = await query(sql, params)
     res.json(result.rows)
@@ -294,10 +301,16 @@ router.patch('/workouts/:id', async (req, res, next) => {
 
 router.get('/workouts', async (req, res, next) => {
   try {
-    const memberId = String(req.query.memberId || '')
-    const result = memberId
-      ? await query('SELECT * FROM workout_logs WHERE member_id = $1 ORDER BY workout_date DESC', [memberId])
-      : await query('SELECT * FROM workout_logs ORDER BY workout_date DESC')
+    const memberId = String(req.query.memberId || '').trim()
+    const ptId = String(req.query.ptId || '').trim()
+    let sql = 'SELECT * FROM workout_logs'
+    const params: string[] = []
+    const clauses: string[] = []
+    if (memberId) { params.push(memberId); clauses.push(`member_id = $${params.length}`) }
+    if (ptId) { params.push(ptId); clauses.push(`pt_id = $${params.length}`) }
+    if (clauses.length) sql += ' WHERE ' + clauses.join(' AND ')
+    sql += ' ORDER BY workout_date DESC'
+    const result = await query(sql, params)
     res.json(result.rows)
   } catch (err) {
     next({ status: 500, code: 'ERR_PT_WORKOUT_LIST', message: 'Failed to list workouts', details: { error: String(err) } })
