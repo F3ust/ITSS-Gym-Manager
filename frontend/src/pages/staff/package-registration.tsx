@@ -307,8 +307,12 @@ export default function PackageRegistrationPage() {
             </div>
           )}
           
-          <label style={{ fontSize: 13, fontWeight: 600 }}>Start Date *</label>
-          <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} required />
+          {selectedPkg?.category !== 'pt' && (
+            <>
+              <label style={{ fontSize: 13, fontWeight: 600 }}>Start Date *</label>
+              <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} required />
+            </>
+          )}
           {dateOverlapError && <p style={{ color: '#d32f2f', fontSize: 12, margin: '4px 0 0 0', fontWeight: 600 }}>{dateOverlapError}</p>}
  
           {selectedPkg && (

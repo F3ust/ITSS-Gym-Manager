@@ -275,34 +275,36 @@ export default function RegisterPackagePage() {
           )}
         </div>
 
-        <div className="card" style={{ padding: 20 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontWeight: 600, fontSize: 15, marginBottom: 14 }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 26, height: 26, borderRadius: '50%', background: 'var(--accent)', color: 'var(--button-text)', fontSize: 13, fontWeight: 700 }}>2</span>
-            Set Start Date
-          </div>
-          {existingSubs.filter(s => {
-            const sPkg = packages.find(p => p.id === s.package_id)
-            return (sPkg?.category === 'membership' || sPkg?.category === 'combo') && (s.status === 'active' || s.status === 'pending')
-          }).length > 0 && (
-            <div style={{ marginBottom: 12, padding: '10px 14px', background: '#f5f5f5', borderRadius: 10, fontSize: 13, maxWidth: 500 }}>
-              <strong>Your active memberships:</strong>
-              {existingSubs.filter(s => {
-                const sPkg = packages.find(p => p.id === s.package_id)
-                return (sPkg?.category === 'membership' || sPkg?.category === 'combo') && (s.status === 'active' || s.status === 'pending')
-              }).map(s => (
-                <div key={s.id}>• {packages.find(p => p.id === s.package_id)?.name}: {new Date(s.start_date).toLocaleDateString()} - {new Date(s.end_date).toLocaleDateString()} ({s.status})</div>
-              ))}
+        {selectedPkg?.category !== 'pt' && (
+          <div className="card" style={{ padding: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontWeight: 600, fontSize: 15, marginBottom: 14 }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 26, height: 26, borderRadius: '50%', background: 'var(--accent)', color: 'var(--button-text)', fontSize: 13, fontWeight: 700 }}>2</span>
+              Set Start Date
             </div>
-          )}
-          <input
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            required
-            style={{ padding: '10px 14px', borderRadius: 10, border: '1px solid var(--stroke)', background: 'var(--panel)', color: 'var(--text-strong)', fontSize: 14, maxWidth: 280 }}
-          />
-          {dateOverlapError && <p style={{ color: '#d32f2f', fontSize: 13, marginTop: 6, fontWeight: 600 }}>{dateOverlapError}</p>}
-        </div>
+            {existingSubs.filter(s => {
+              const sPkg = packages.find(p => p.id === s.package_id)
+              return (sPkg?.category === 'membership' || sPkg?.category === 'combo') && (s.status === 'active' || s.status === 'pending')
+            }).length > 0 && (
+              <div style={{ marginBottom: 12, padding: '10px 14px', background: '#f5f5f5', borderRadius: 10, fontSize: 13, maxWidth: 500 }}>
+                <strong>Your active memberships:</strong>
+                {existingSubs.filter(s => {
+                  const sPkg = packages.find(p => p.id === s.package_id)
+                  return (sPkg?.category === 'membership' || sPkg?.category === 'combo') && (s.status === 'active' || s.status === 'pending')
+                }).map(s => (
+                  <div key={s.id}>• {packages.find(p => p.id === s.package_id)?.name}: {new Date(s.start_date).toLocaleDateString()} - {new Date(s.end_date).toLocaleDateString()} ({s.status})</div>
+                ))}
+              </div>
+            )}
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              required
+              style={{ padding: '10px 14px', borderRadius: 10, border: '1px solid var(--stroke)', background: 'var(--panel)', color: 'var(--text-strong)', fontSize: 14, maxWidth: 280 }}
+            />
+            {dateOverlapError && <p style={{ color: '#d32f2f', fontSize: 13, marginTop: 6, fontWeight: 600 }}>{dateOverlapError}</p>}
+          </div>
+        )}
 
         {error && <p style={{ color: '#d32f2f', fontSize: 14 }}>{error}</p>}
 

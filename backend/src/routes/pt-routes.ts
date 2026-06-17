@@ -117,20 +117,31 @@ router.get('/assignments', async (req, res, next) => {
 })
 
 router.post('/assignments', async (req, res, next) => {
+  const client = await pool.connect()
   try {
     const { ptId, memberId } = req.body
     if (!ptId || !memberId) {
       return res.status(400).json({ code: 'ERR_VALIDATION', message: 'Missing required fields' })
     }
-    const result = await query(
-      'INSERT INTO pt_assignments (pt_id, member_id) VALUES ($1,$2) RETURNING *',
+    await client.query('BEGIN')
+    await client.query(
+      "UPDATE pt_assignments SET status = 'inactive' WHERE member_id = $1 AND status = 'active'",
+      [memberId]
+    )
+    const result = await client.query(
+      "INSERT INTO pt_assignments (pt_id, member_id, status) VALUES ($1,$2,'active') RETURNING *",
       [ptId, memberId]
     )
+    await client.query('COMMIT')
     res.status(201).json(result.rows[0])
   } catch (err) {
+    try { await client.query('ROLLBACK') } catch { /* */ }
     next({ status: 500, code: 'ERR_PT_ASSIGN_CREATE', message: 'Failed to create assignment', details: { error: String(err) } })
+  } finally {
+    client.release()
   }
 })
+
 
 router.get('/schedules/:id', async (req, res, next) => {
   try {
