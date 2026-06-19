@@ -121,8 +121,8 @@ export default function PackageRegistrationPage() {
     }
     const pkg = packages.find((p) => p.id === packageId)
     if (!pkg) return
-    if (pkg.category === 'pt' && !ptId) {
-      setError('Select a PT for this PT package')
+    if ((pkg.category === 'pt' || pkg.category === 'combo') && !ptId) {
+      setError('Select a PT for this package')
       return
     }
     setError('')
@@ -137,7 +137,7 @@ export default function PackageRegistrationPage() {
         remainingSessions: null,
         remainingPtSessions: pkg.pt_session_count || null,
       })
-      if (pkg.category === 'pt' && ptId) {
+      if ((pkg.category === 'pt' || pkg.category === 'combo') && ptId) {
         await apiPost('/pt/assignments', { ptId, memberId })
       }
       navigate(`/staff/payment/${sub.id}`)
@@ -295,7 +295,7 @@ export default function PackageRegistrationPage() {
             </div>
           </div>
           
-          {selectedPkg?.category === 'pt' && (
+          {(selectedPkg?.category === 'pt' || selectedPkg?.category === 'combo') && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-strong)' }}>Select Personal Trainer (PT) *</label>
               <select value={ptId} onChange={(e) => setPtId(e.target.value)} required style={{ padding: '10px 14px', borderRadius: 10, border: '1px solid var(--stroke)', background: 'var(--panel)', color: 'var(--text-strong)' }}>
