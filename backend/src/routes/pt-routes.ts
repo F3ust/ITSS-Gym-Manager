@@ -104,9 +104,12 @@ router.delete('/assignments/:id', async (req, res, next) => {
   }
 })
 
-router.get('/assignments', async (_req, res, next) => {
+router.get('/assignments', async (req, res, next) => {
   try {
-    const result = await query('SELECT * FROM pt_assignments ORDER BY id')
+    const ptId = String(req.query.ptId || '').trim()
+    const result = ptId
+      ? await query('SELECT * FROM pt_assignments WHERE pt_id = $1 ORDER BY id', [ptId])
+      : await query('SELECT * FROM pt_assignments ORDER BY id')
     res.json(result.rows)
   } catch (err) {
     next({ status: 500, code: 'ERR_PT_ASSIGN_LIST', message: 'Failed to list assignments', details: { error: String(err) } })
@@ -114,20 +117,31 @@ router.get('/assignments', async (_req, res, next) => {
 })
 
 router.post('/assignments', async (req, res, next) => {
+  const client = await pool.connect()
   try {
     const { ptId, memberId } = req.body
     if (!ptId || !memberId) {
       return res.status(400).json({ code: 'ERR_VALIDATION', message: 'Missing required fields' })
     }
-    const result = await query(
-      'INSERT INTO pt_assignments (pt_id, member_id) VALUES ($1,$2) RETURNING *',
+    await client.query('BEGIN')
+    await client.query(
+      "UPDATE pt_assignments SET status = 'inactive' WHERE member_id = $1 AND status = 'active'",
+      [memberId]
+    )
+    const result = await client.query(
+      "INSERT INTO pt_assignments (pt_id, member_id, status) VALUES ($1,$2,'active') RETURNING *",
       [ptId, memberId]
     )
+    await client.query('COMMIT')
     res.status(201).json(result.rows[0])
   } catch (err) {
+    try { await client.query('ROLLBACK') } catch { /* */ }
     next({ status: 500, code: 'ERR_PT_ASSIGN_CREATE', message: 'Failed to create assignment', details: { error: String(err) } })
+  } finally {
+    client.release()
   }
 })
+
 
 router.get('/schedules/:id', async (req, res, next) => {
   try {
@@ -143,10 +157,14 @@ router.get('/schedules/:id', async (req, res, next) => {
 
 router.get('/schedules', async (req, res, next) => {
   try {
-    const date = String(req.query.date || '')
+    const date = String(req.query.date || '').trim()
+    const ptId = String(req.query.ptId || '').trim()
     let sql = 'SELECT ps.*, m.full_name AS member_name FROM pt_schedules ps LEFT JOIN members m ON m.id = ps.member_id'
     const params: string[] = []
-    if (date) { params.push(date); sql += ` WHERE ps.start_at::date = $1` }
+    const clauses: string[] = []
+    if (date) { params.push(date); clauses.push(`ps.start_at::date = $${params.length}`) }
+    if (ptId) { params.push(ptId); clauses.push(`ps.pt_id = $${params.length}`) }
+    if (clauses.length) sql += ' WHERE ' + clauses.join(' AND ')
     sql += ' ORDER BY ps.start_at ASC'
     const result = await query(sql, params)
     res.json(result.rows)
@@ -294,10 +312,16 @@ router.patch('/workouts/:id', async (req, res, next) => {
 
 router.get('/workouts', async (req, res, next) => {
   try {
-    const memberId = String(req.query.memberId || '')
-    const result = memberId
-      ? await query('SELECT * FROM workout_logs WHERE member_id = $1 ORDER BY workout_date DESC', [memberId])
-      : await query('SELECT * FROM workout_logs ORDER BY workout_date DESC')
+    const memberId = String(req.query.memberId || '').trim()
+    const ptId = String(req.query.ptId || '').trim()
+    let sql = 'SELECT * FROM workout_logs'
+    const params: string[] = []
+    const clauses: string[] = []
+    if (memberId) { params.push(memberId); clauses.push(`member_id = $${params.length}`) }
+    if (ptId) { params.push(ptId); clauses.push(`pt_id = $${params.length}`) }
+    if (clauses.length) sql += ' WHERE ' + clauses.join(' AND ')
+    sql += ' ORDER BY workout_date DESC'
+    const result = await query(sql, params)
     res.json(result.rows)
   } catch (err) {
     next({ status: 500, code: 'ERR_PT_WORKOUT_LIST', message: 'Failed to list workouts', details: { error: String(err) } })

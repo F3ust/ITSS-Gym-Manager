@@ -1,14 +1,30 @@
 import { useState, useEffect } from 'react'
 import { apiGet } from '../../api/client'
+import { useAuth } from '../../contexts/auth-context'
 
 interface CheckIn { id: string; check_in_at: string; method: string }
 
 export default function MemberDashboard() {
+  const { user } = useAuth()
   const [checkins, setCheckins] = useState<CheckIn[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    apiGet<CheckIn[]>('/check-ins?limit=5').then(setCheckins).catch(() => {})
-  }, [])
+    if (!user) return
+    setLoading(true)
+    apiGet<{ id: string }>(`/members?userId=${user.id}`)
+      .then((member) => {
+        if (member?.id) {
+          apiGet<CheckIn[]>(`/check-ins?memberId=${member.id}`).then((data) => {
+            setCheckins(data.slice(0, 5))
+          }).catch(() => {})
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [user])
+
+  if (loading) return <div className="page-loading">Loading...</div>
 
   return (
     <div className="page-container">

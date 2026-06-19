@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { apiGet, apiPost, apiPatch } from '../../api/client'
+import { useAuth } from '../../contexts/auth-context'
 
 interface Workout {
   id: string; member_id: string; pt_id: string | null;
@@ -9,8 +10,10 @@ interface Workout {
 interface Member { id: string; full_name: string }
 
 export default function WorkoutLogsPage() {
+  const { user } = useAuth()
   const [workouts, setWorkouts] = useState<Workout[]>([])
   const [members, setMembers] = useState<Map<string, Member>>(new Map())
+  const [ptProfile, setPtProfile] = useState<{ id: string } | null>(null)
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -19,14 +22,21 @@ export default function WorkoutLogsPage() {
   const [message, setMessage] = useState('')
 
   useEffect(() => {
-    Promise.all([
-      apiGet<Workout[]>('/pt/workouts'),
-      apiGet<Member[]>('/members'),
-    ]).then(([w, m]) => {
-      setWorkouts(w)
-      setMembers(new Map(m.map((x: Member) => [x.id, x])))
-    }).catch(() => {}).finally(() => setLoading(false))
-  }, [])
+    if (!user) return
+    setLoading(true)
+    apiGet<Member[]>('/members')
+      .then(async (mems) => {
+        setMembers(new Map(mems.map((x: Member) => [x.id, x])))
+        const profile = await apiGet<{ id: string }>('/pt/profile?userId=' + user.id)
+        setPtProfile(profile)
+        if (profile) {
+          const w = await apiGet<Workout[]>('/pt/workouts?ptId=' + profile.id)
+          setWorkouts(w)
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [user])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -40,6 +50,7 @@ export default function WorkoutLogsPage() {
         intensity: form.intensity || null,
         notes: form.notes || null,
         rating: form.rating ? Number(form.rating) : null,
+        ptId: ptProfile?.id || null,
       }
       if (editingId) {
         await apiPatch(`/pt/workouts/${editingId}`, body)
@@ -51,8 +62,10 @@ export default function WorkoutLogsPage() {
       setShowForm(false)
       setEditingId(null)
       setForm({ memberId: '', workoutDate: '', durationMin: '', intensity: '', notes: '', rating: '' })
-      const [w] = await Promise.all([apiGet<Workout[]>('/pt/workouts')])
-      setWorkouts(w)
+      if (ptProfile) {
+        const w = await apiGet<Workout[]>('/pt/workouts?ptId=' + ptProfile.id)
+        setWorkouts(w)
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed')
     }

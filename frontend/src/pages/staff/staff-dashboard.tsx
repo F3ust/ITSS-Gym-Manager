@@ -47,7 +47,7 @@ export default function StaffDashboard() {
       setCheckinCount(checkins.length)
     } catch { setCheckinCount(0) }
     try {
-      const feedback: any[] = await apiGet('/feedback?status=' + encodeURIComponent('Mới'))
+      const feedback: any[] = await apiGet('/feedback?status=' + encodeURIComponent('new'))
       feedbackCount = feedback.length
       setPendingFeedbackCount(feedbackCount)
     } catch { setPendingFeedbackCount(0) }

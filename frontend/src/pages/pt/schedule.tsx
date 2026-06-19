@@ -21,20 +21,23 @@ export default function PtSchedulePage() {
   const [message, setMessage] = useState('')
 
   useEffect(() => {
-    load()
-  }, [])
+    if (user) {
+      load()
+    }
+  }, [user])
 
   async function load() {
+    if (!user) return
     try {
       setLoading(true)
-      const [sch, mems, profile] = await Promise.all([
-        apiGet<Schedule[]>('/pt/schedules'),
-        apiGet<Member[]>('/members'),
-        user ? apiGet<PtProfile>('/pt/profile?userId=' + user.id) : Promise.resolve(null),
-      ])
-      setSchedules(sch)
+      const mems = await apiGet<Member[]>('/members')
       setMembers(new Map(mems.map((m: Member) => [m.id, m])))
+      const profile = await apiGet<PtProfile>('/pt/profile?userId=' + user.id)
       setPtProfile(profile)
+      if (profile) {
+        const sch = await apiGet<Schedule[]>('/pt/schedules?ptId=' + profile.id)
+        setSchedules(sch)
+      }
     } finally {
       setLoading(false)
     }

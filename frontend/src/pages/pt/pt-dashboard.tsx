@@ -2,35 +2,52 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiGet } from '../../api/client'
 import { pushNotification } from '../../hooks/use-notifications'
+import { useAuth } from '../../contexts/auth-context'
 
 export default function PtDashboard() {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [assignedCount, setAssignedCount] = useState(0)
   const [todaySchedules, setTodaySchedules] = useState<any[]>([])
   const [recentWorkouts, setRecentWorkouts] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
 
-  async function loadStats() {
+  async function loadStats(ptId: string) {
     const today = new Date().toISOString().slice(0, 10)
     let assigned = 0, schedCount = 0
     try {
-      const as: any[] = await apiGet('/pt/assignments')
+      const as: any[] = await apiGet('/pt/assignments?ptId=' + ptId)
       assigned = as.length
       setAssignedCount(assigned)
     } catch { setAssignedCount(0) }
     try {
-      const ss: any[] = await apiGet('/pt/schedules?date=' + today)
+      const ss: any[] = await apiGet('/pt/schedules?date=' + today + '&ptId=' + ptId)
       schedCount = ss.length
       setTodaySchedules(ss.slice(0, 5))
     } catch { setTodaySchedules([]) }
     try {
-      const ws: any[] = await apiGet('/pt/workouts')
+      const ws: any[] = await apiGet('/pt/workouts?ptId=' + ptId)
       setRecentWorkouts(ws.slice(0, 5))
     } catch { setRecentWorkouts([]) }
     if (assigned > 0) pushNotification('👤', `You have ${assigned} assigned member${assigned > 1 ? 's' : ''}`)
     if (schedCount > 0) pushNotification('📅', `${schedCount} session${schedCount > 1 ? 's' : ''} scheduled today`)
   }
 
-  useEffect(() => { loadStats() }, [])
+  useEffect(() => {
+    if (!user) return
+    setLoading(true)
+    apiGet<{ id: string }>('/pt/profile?userId=' + user.id)
+      .then((profile) => {
+        if (profile?.id) {
+          loadStats(profile.id).finally(() => setLoading(false))
+        } else {
+          setLoading(false)
+        }
+      })
+      .catch(() => setLoading(false))
+  }, [user])
+
+  if (loading) return <div className="page-loading">Loading...</div>
 
   return (
     <div>

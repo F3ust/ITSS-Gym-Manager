@@ -81,18 +81,18 @@ export default function PaymentPage() {
       <div className="card">
         {done ? (
           <>
-            <p style={{ color: '#2e7d32', fontSize: 15, fontWeight: 600, marginBottom: 12 }}>{message}</p>
+            <p style={{ color: '#15803d', fontSize: 15, fontWeight: 600, marginBottom: 12 }}>{message}</p>
             <button className="btn-primary" onClick={() => navigate('/staff/package-registration')}>New Registration</button>
           </>
         ) : (
           <form onSubmit={handlePay} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {member && (
-              <div style={{ fontSize: 14, background: '#f5f5f5', padding: 12, borderRadius: 6 }}>
+              <div style={{ fontSize: 14, background: 'var(--bg)', padding: 12, borderRadius: 6 }}>
                 <p><strong>Member:</strong> {member.full_name} ({member.phone})</p>
                 {pkg && <p><strong>Package:</strong> {pkg.name}</p>}
                 {sub && <p><strong>Period:</strong> {sub.start_date} → {sub.end_date}</p>}
                 {pkg && (
-                  <p style={{ fontSize: 18, fontWeight: 700, marginTop: 8 }}>
+                  <p style={{ fontSize: 18, fontWeight: 700, marginTop: 8, color: 'var(--accent)' }}>
                     Amount: {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(pkg.price)}
                   </p>
                 )}
@@ -104,9 +104,9 @@ export default function PaymentPage() {
               <option value="card">Credit Card</option>
             </select>
             {method === 'transfer' && (
-              <div style={{ textAlign: 'center', padding: 12, background: '#f9f9f9', borderRadius: 6 }}>
+              <div style={{ textAlign: 'center', padding: 12, background: 'var(--bg)', borderRadius: 6 }}>
                 <img src="/payment-qr.png" alt="Bank Transfer QR" style={{ width: 200, height: 200, objectFit: 'contain' }} />
-                <p style={{ marginTop: 8, fontSize: 13, color: '#555' }}>Beneficiary: <strong>Rick Astley</strong></p>
+                <p style={{ marginTop: 8, fontSize: 13, color: 'var(--muted)' }}>Beneficiary: <strong>Rick Astley</strong></p>
               </div>
             )}
             {error && <p className="form-error">{error}</p>}

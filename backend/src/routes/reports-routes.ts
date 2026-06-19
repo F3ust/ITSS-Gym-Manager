@@ -11,11 +11,26 @@ router.get('/revenue', async (req, res, next) => {
       return res.status(400).json({ code: 'ERR_VALIDATION', message: 'Missing from/to' })
     }
     const result = await query(
-      'SELECT COALESCE(SUM(amount),0) AS total FROM payments WHERE paid_at::date BETWEEN $1 AND $2',
+      'SELECT paid_at::date AS day, COALESCE(SUM(amount),0)::int AS total FROM payments WHERE paid_at::date BETWEEN $1 AND $2 GROUP BY day ORDER BY day',
       [String(from), String(to)]
     )
-    const total = Number((result.rows[0] as { total: number | string }).total)
-    res.json({ total })
+    const breakdown = result.rows.map((row: any) => {
+      let dayStr = ''
+      if (row.day instanceof Date) {
+        const y = row.day.getFullYear()
+        const m = String(row.day.getMonth() + 1).padStart(2, '0')
+        const d = String(row.day.getDate()).padStart(2, '0')
+        dayStr = `${y}-${m}-${d}`
+      } else {
+        dayStr = String(row.day).split('T')[0]
+      }
+      return {
+        day: dayStr,
+        total: Number(row.total)
+      }
+    })
+    const total = breakdown.reduce((sum: number, r: any) => sum + r.total, 0)
+    res.json({ total, breakdown })
   } catch (err) {
     next({ status: 500, code: 'ERR_REPORT_REVENUE', message: 'Failed to build revenue report', details: { error: String(err) } })
   }
