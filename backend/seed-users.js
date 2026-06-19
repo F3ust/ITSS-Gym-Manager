@@ -1,10 +1,19 @@
-const { randomBytes, scryptSync, timingSafeEqual } = require('crypto')
+require('dotenv').config()
+const { randomBytes, scryptSync } = require('crypto')
 const { Pool } = require('pg')
 
-const pool = new Pool({
-  connectionString: 'postgresql://postgres:Lolbrowtf123%40@db.fmskdmmtrdewuyjssoxu.supabase.co:5432/postgres',
-  ssl: { rejectUnauthorized: false }
-})
+const connectionString = process.env.DATABASE_URL
+const sslMode = String(process.env.PGSSLMODE || process.env.DATABASE_SSL || '').toLowerCase()
+const rejectUnauthorized = process.env.DATABASE_SSL_REJECT_UNAUTHORIZED !== 'false'
+
+const config = {
+  connectionString,
+}
+if (sslMode === 'true' || sslMode === 'require' || sslMode === 'verify-full' || sslMode === 'verify-ca') {
+  config.ssl = { rejectUnauthorized }
+}
+
+const pool = new Pool(config)
 
 function hashPassword(password) {
   const salt = randomBytes(16).toString('hex')

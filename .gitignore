@@ -96,3 +96,9 @@ external/
 
 # Git worktrees (local development only)
 worktrees/
+.gitnexus
+
+CLAUDE.md
+AGENTS.md
+
+.agents

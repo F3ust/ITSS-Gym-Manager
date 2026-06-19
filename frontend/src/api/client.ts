@@ -1,4 +1,15 @@
-const API = 'http://localhost:4000/api'
+const API = import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
+
+function getToken(): string | null {
+  try {
+    const raw = localStorage.getItem('auth')
+    if (!raw) return null
+    const auth = JSON.parse(raw)
+    return auth?.token || null
+  } catch {
+    return null
+  }
+}
 
 function getRole(): string | null {
   try {
@@ -11,9 +22,22 @@ function getRole(): string | null {
   }
 }
 
+function getHeaders(): HeadersInit {
+  const headers: Record<string, string> = {}
+  const token = getToken()
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`
+  }
+  const role = getRole()
+  if (role) {
+    headers['x-role'] = role
+  }
+  return headers
+}
+
 export async function apiGet<T = unknown>(path: string): Promise<T> {
   const res = await fetch(`${API}${path}`, {
-    headers: { 'x-role': getRole() || '' },
+    headers: getHeaders(),
   })
   if (!res.ok) {
     const data = await res.json().catch(() => ({}))
@@ -25,7 +49,7 @@ export async function apiGet<T = unknown>(path: string): Promise<T> {
 export async function apiPost<T = unknown>(path: string, body: unknown): Promise<T> {
   const res = await fetch(`${API}${path}`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-role': getRole() || '' },
+    headers: { 'Content-Type': 'application/json', ...getHeaders() },
     body: JSON.stringify(body),
   })
   if (!res.ok) {
@@ -38,7 +62,7 @@ export async function apiPost<T = unknown>(path: string, body: unknown): Promise
 export async function apiPatch<T = unknown>(path: string, body: unknown): Promise<T> {
   const res = await fetch(`${API}${path}`, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', 'x-role': getRole() || '' },
+    headers: { 'Content-Type': 'application/json', ...getHeaders() },
     body: JSON.stringify(body),
   })
   if (!res.ok) {
@@ -53,7 +77,7 @@ export async function apiPatch<T = unknown>(path: string, body: unknown): Promis
 export async function apiPut<T = unknown>(path: string, body: unknown): Promise<T> {
   const res = await fetch(`${API}${path}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json', 'x-role': getRole() || '' },
+    headers: { 'Content-Type': 'application/json', ...getHeaders() },
     body: JSON.stringify(body),
   })
   if (!res.ok) {
@@ -66,7 +90,7 @@ export async function apiPut<T = unknown>(path: string, body: unknown): Promise<
 export async function apiDelete(path: string): Promise<void> {
   const res = await fetch(`${API}${path}`, {
     method: 'DELETE',
-    headers: { 'x-role': getRole() || '' },
+    headers: getHeaders(),
   })
   if (!res.ok) {
     const data = await res.json().catch(() => ({}))
