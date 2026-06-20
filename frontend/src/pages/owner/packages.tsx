@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { apiGet, apiPost, apiPatch } from '../../api/client'
+import { fmtVND } from '../../utils/format'
 
 interface Package {
   id: string
@@ -103,9 +104,6 @@ export default function PackagesPage() {
     load()
   }
 
-  function formatVND(amount: number) {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount)
-  }
 
   if (loading) return (
     <div className="page-container">
@@ -215,7 +213,7 @@ export default function PackagesPage() {
                   {pkg.description && <p style={{ fontSize: 12, color: 'var(--muted)', marginTop: 8, lineHeight: '1.4' }}>{pkg.description}</p>}
                 </div>
                 <div style={{ marginTop: 12 }}>
-                  <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--accent)', marginBottom: 8 }}>{formatVND(pkg.price)}</div>
+                  <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--accent)', marginBottom: 8 }}>{fmtVND(pkg.price)}</div>
                   <div style={{ display: 'flex', gap: 8 }}>
                     <button className="btn-sm" style={{ flex: 1 }} onClick={() => openEdit(pkg)}>Edit</button>
                     {pkg.status === 'active' && (
@@ -246,7 +244,7 @@ export default function PackagesPage() {
                   {pkg.description && <p style={{ fontSize: 12, color: 'var(--muted)', marginTop: 8, lineHeight: '1.4' }}>{pkg.description}</p>}
                 </div>
                 <div style={{ marginTop: 12 }}>
-                  <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--accent)', marginBottom: 8 }}>{formatVND(pkg.price)}</div>
+                  <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--accent)', marginBottom: 8 }}>{fmtVND(pkg.price)}</div>
                   <div style={{ display: 'flex', gap: 8 }}>
                     <button className="btn-sm" style={{ flex: 1 }} onClick={() => openEdit(pkg)}>Edit</button>
                     {pkg.status === 'active' && (
@@ -277,7 +275,7 @@ export default function PackagesPage() {
                   {pkg.description && <p style={{ fontSize: 12, color: 'var(--muted)', marginTop: 8, lineHeight: '1.4' }}>{pkg.description}</p>}
                 </div>
                 <div style={{ marginTop: 12 }}>
-                  <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--accent)', marginBottom: 8 }}>{formatVND(pkg.price)}</div>
+                  <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--accent)', marginBottom: 8 }}>{fmtVND(pkg.price)}</div>
                   <div style={{ display: 'flex', gap: 8 }}>
                     <button className="btn-sm" style={{ flex: 1 }} onClick={() => openEdit(pkg)}>Edit</button>
                     {pkg.status === 'active' && (

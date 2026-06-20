@@ -185,7 +185,7 @@ router.post('/schedules', async (req, res, next) => {
       return res.status(400).json({ code: 'ERR_VALIDATION', message: 'Missing required fields' })
     }
     const conflict = await pool.query(
-      'SELECT 1 FROM pt_schedules WHERE (pt_id = $1 OR member_id = $2) AND tstzrange(start_at, end_at) && tstzrange($3, $4) LIMIT 1',
+      'SELECT 1 FROM pt_schedules WHERE (pt_id = $1 OR member_id = $2) AND start_at < $4 AND end_at > $3 LIMIT 1',
       [ptId, memberId, startAt, endAt]
     )
     if (conflict.rows[0]) {
@@ -221,7 +221,7 @@ router.patch('/schedules/:id', async (req, res, next) => {
     const newStart = startAt || schedule.start_at
     const newEnd = endAt || schedule.end_at
     const conflict = await pool.query(
-      'SELECT 1 FROM pt_schedules WHERE id <> $1 AND (pt_id = $2 OR member_id = $3) AND tstzrange(start_at, end_at) && tstzrange($4, $5) LIMIT 1',
+      'SELECT 1 FROM pt_schedules WHERE id <> $1 AND (pt_id = $2 OR member_id = $3) AND start_at < $5 AND end_at > $4 LIMIT 1',
       [req.params.id, schedule.pt_id, schedule.member_id, newStart, newEnd]
     )
     if (conflict.rows[0]) {

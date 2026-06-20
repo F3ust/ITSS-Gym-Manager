@@ -30,6 +30,7 @@ export default function PtSchedulePage() {
     if (!user) return
     try {
       setLoading(true)
+      setError('')
       const mems = await apiGet<Member[]>('/members')
       setMembers(new Map(mems.map((m: Member) => [m.id, m])))
       const profile = await apiGet<PtProfile>('/pt/profile?userId=' + user.id)
@@ -38,6 +39,8 @@ export default function PtSchedulePage() {
         const sch = await apiGet<Schedule[]>('/pt/schedules?ptId=' + profile.id)
         setSchedules(sch)
       }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load data')
     } finally {
       setLoading(false)
     }

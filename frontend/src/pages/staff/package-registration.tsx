@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiGet, apiPost } from '../../api/client'
+import { fmtVND } from '../../utils/format'
 
 interface Member { id: string; full_name: string; phone: string }
 interface Package { id: string; name: string; duration_days: number; price: number; category: string; session_count?: number | null; pt_session_count?: number | null; status: string }
@@ -221,7 +222,7 @@ export default function PackageRegistrationPage() {
                       <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>Duration: {p.duration_days} days</div>
                     </div>
                     <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--accent)', marginTop: 8 }}>
-                      {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(p.price)}
+                      {fmtVND(p.price)}
                     </div>
                   </div>
                 )
@@ -254,7 +255,7 @@ export default function PackageRegistrationPage() {
                       <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>Sessions: {p.pt_session_count} PT sessions</div>
                     </div>
                     <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--accent)', marginTop: 8 }}>
-                      {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(p.price)}
+                      {fmtVND(p.price)}
                     </div>
                   </div>
                 )
@@ -287,7 +288,7 @@ export default function PackageRegistrationPage() {
                       <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>Details: {p.duration_days} days + {p.pt_session_count} PT sessions</div>
                     </div>
                     <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--accent)', marginTop: 8 }}>
-                      {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(p.price)}
+                      {fmtVND(p.price)}
                     </div>
                   </div>
                 )

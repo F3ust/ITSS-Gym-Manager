@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { apiGet, apiPost } from '../../api/client'
+import { fmtVND } from '../../utils/format'
 
 interface Subscription {
   id: string
@@ -63,7 +64,7 @@ export default function PaymentPage() {
     setError('')
     try {
       await apiPost('/payments', { subscriptionId: sub.id, amount: pkg.price, method, endDate: sub.end_date, remainingSessions: null })
-      setMessage(`Payment of ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(pkg.price)} via ${method} completed`)
+      setMessage(`Payment of ${fmtVND(pkg.price)} via ${method} completed`)
       setDone(true)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Payment failed')
@@ -93,7 +94,7 @@ export default function PaymentPage() {
                 {sub && <p><strong>Period:</strong> {sub.start_date} → {sub.end_date}</p>}
                 {pkg && (
                   <p style={{ fontSize: 18, fontWeight: 700, marginTop: 8, color: 'var(--accent)' }}>
-                    Amount: {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(pkg.price)}
+                    Amount: {fmtVND(pkg.price)}
                   </p>
                 )}
               </div>
@@ -111,7 +112,7 @@ export default function PaymentPage() {
             )}
             {error && <p className="form-error">{error}</p>}
             <button type="submit" className="btn-primary" disabled={processing}>
-              {processing ? 'Processing...' : `Pay ${pkg ? new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(pkg.price) : ''}`}
+              {processing ? 'Processing...' : `Pay ${pkg ? fmtVND(pkg.price) : ''}`}
             </button>
           </form>
         )}

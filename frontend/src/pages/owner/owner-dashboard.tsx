@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiGet } from '../../api/client'
 import { pushNotification } from '../../hooks/use-notifications'
+import { fmtVND } from '../../utils/format'
 
 interface Package { price: number; status: string }
 interface Staff { id: string }
@@ -128,7 +129,7 @@ export default function OwnerDashboard() {
       
       <div className="stats-grid" style={{ marginBottom: 24 }}>
         {[
-          { label: 'Weekly Revenue', value: `${revenue.toLocaleString('vi-VN')} VNĐ`, color: '#ea580c' },
+          { label: 'Weekly Revenue', value: fmtVND(revenue), color: '#ea580c' },
           { label: 'Active Packages', value: stats.packages, color: '#3b82f6' },
           { label: 'Staff Members', value: stats.staff, color: '#10b981' },
           { label: 'Equipment Items', value: stats.equipment, color: '#8b5cf6' },
