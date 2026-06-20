@@ -31,15 +31,15 @@ function renderLoginPage() {
 
 test('renders login form inputs and button', () => {
   renderLoginPage()
-  expect(screen.getByPlaceholderText('Phone number')).toBeInTheDocument()
-  expect(screen.getByPlaceholderText('Password')).toBeInTheDocument()
+  expect(screen.getByLabelText('Phone Number')).toBeInTheDocument()
+  expect(screen.getByLabelText('Password')).toBeInTheDocument()
   expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument()
 })
 
 test('allows typing in phone and password fields', () => {
   renderLoginPage()
-  const phoneInput = screen.getByPlaceholderText('Phone number') as HTMLInputElement
-  const passwordInput = screen.getByPlaceholderText('Password') as HTMLInputElement
+  const phoneInput = screen.getByLabelText('Phone Number') as HTMLInputElement
+  const passwordInput = screen.getByLabelText('Password') as HTMLInputElement
 
   fireEvent.change(phoneInput, { target: { value: '1234567890' } })
   fireEvent.change(passwordInput, { target: { value: 'password123' } })
@@ -56,8 +56,8 @@ test('calls loginApi and navigates on successful submit', async () => {
   })
 
   renderLoginPage()
-  const phoneInput = screen.getByPlaceholderText('Phone number')
-  const passwordInput = screen.getByPlaceholderText('Password')
+  const phoneInput = screen.getByLabelText('Phone Number')
+  const passwordInput = screen.getByLabelText('Password')
   const submitButton = screen.getByRole('button', { name: /sign in/i })
 
   fireEvent.change(phoneInput, { target: { value: '1111111111' } })
@@ -74,8 +74,8 @@ test('displays error message on login failure', async () => {
   vi.mocked(authApi.loginApi).mockRejectedValueOnce(new Error('Invalid phone or password'))
 
   renderLoginPage()
-  const phoneInput = screen.getByPlaceholderText('Phone number')
-  const passwordInput = screen.getByPlaceholderText('Password')
+  const phoneInput = screen.getByLabelText('Phone Number')
+  const passwordInput = screen.getByLabelText('Password')
   const submitButton = screen.getByRole('button', { name: /sign in/i })
 
   fireEvent.change(phoneInput, { target: { value: '1111111111' } })

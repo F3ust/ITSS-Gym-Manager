@@ -64,7 +64,28 @@ export default function SettingsPage() {
     u.username.toLowerCase().includes(search.toLowerCase())
   )
 
-  if (loading) return <div className="page-loading">Loading...</div>
+  if (loading) return (
+    <div className="page-container">
+      <div className="page-header"><div className="skeleton-header" style={{ width: 220 }} /></div>
+      <div className="skeleton-container" style={{ gap: 20 }}>
+        <div style={{ display: 'flex', gap: 12 }}>
+          <div className="skeleton-header" style={{ width: 100, height: 36, borderRadius: 20 }} />
+          <div className="skeleton-header" style={{ width: 140, height: 36, borderRadius: 20 }} />
+          <div className="skeleton-header" style={{ width: 140, height: 36, borderRadius: 20 }} />
+        </div>
+        <div className="card" style={{ padding: 28, maxWidth: 480 }}>
+          <div className="skeleton-container" style={{ gap: 14 }}>
+            <div className="skeleton-header" style={{ width: 80, height: 12 }} />
+            <div className="skeleton-row" style={{ height: 42, borderRadius: 10 }} />
+            <div className="skeleton-header" style={{ width: 80, height: 12, marginTop: 8 }} />
+            <div className="skeleton-row" style={{ height: 42, borderRadius: 10 }} />
+            <div className="skeleton-header" style={{ width: 80, height: 12, marginTop: 8 }} />
+            <div className="skeleton-row" style={{ height: 42, borderRadius: 10 }} />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 
   return (
     <div className="page-container">
@@ -80,24 +101,24 @@ export default function SettingsPage() {
         <div className="card" style={{ padding: 24 }}>
           <form onSubmit={saveGymProfile} style={{ display: 'flex', flexDirection: 'column', gap: 14, maxWidth: 480 }}>
             <div>
-              <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--muted)', marginBottom: 4 }}>Gym Name *</label>
-              <input value={gymForm.name} onChange={(e) => setGymForm(f => ({ ...f, name: e.target.value }))} required />
+              <label htmlFor="gym-name" style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--muted)', marginBottom: 4 }}>Gym Name *</label>
+              <input id="gym-name" value={gymForm.name} onChange={(e) => setGymForm(f => ({ ...f, name: e.target.value }))} required />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--muted)', marginBottom: 4 }}>Address *</label>
-              <input value={gymForm.address} onChange={(e) => setGymForm(f => ({ ...f, address: e.target.value }))} required />
+              <label htmlFor="gym-address" style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--muted)', marginBottom: 4 }}>Address *</label>
+              <input id="gym-address" value={gymForm.address} onChange={(e) => setGymForm(f => ({ ...f, address: e.target.value }))} required />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--muted)', marginBottom: 4 }}>Phone *</label>
-              <input value={gymForm.phone} onChange={(e) => setGymForm(f => ({ ...f, phone: e.target.value }))} required />
+              <label htmlFor="gym-phone" style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--muted)', marginBottom: 4 }}>Phone *</label>
+              <input id="gym-phone" value={gymForm.phone} onChange={(e) => setGymForm(f => ({ ...f, phone: e.target.value }))} required />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--muted)', marginBottom: 4 }}>Email</label>
-              <input value={gymForm.email} onChange={(e) => setGymForm(f => ({ ...f, email: e.target.value }))} />
+              <label htmlFor="gym-email" style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--muted)', marginBottom: 4 }}>Email</label>
+              <input id="gym-email" value={gymForm.email} onChange={(e) => setGymForm(f => ({ ...f, email: e.target.value }))} />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--muted)', marginBottom: 4 }}>Opening Hours</label>
-              <input value={gymForm.open_hours} onChange={(e) => setGymForm(f => ({ ...f, open_hours: e.target.value }))} placeholder="e.g. Mon-Sun 6:00-22:00" />
+              <label htmlFor="gym-open-hours" style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--muted)', marginBottom: 4 }}>Opening Hours</label>
+              <input id="gym-open-hours" value={gymForm.open_hours} onChange={(e) => setGymForm(f => ({ ...f, open_hours: e.target.value }))} placeholder="e.g. Mon-Sun 6:00-22:00" />
             </div>
             {gymMessage && <p style={{ fontSize: 14, color: gymMessage.includes('updated') ? '#2e7d32' : '#d32f2f', margin: 0 }}>{gymMessage}</p>}
             <button type="submit" className="btn-primary" disabled={gymSaving} style={{ alignSelf: 'flex-start', padding: '10px 24px' }}>
