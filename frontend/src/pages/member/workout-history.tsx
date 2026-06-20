@@ -41,7 +41,14 @@ export default function WorkoutHistoryPage() {
   // Group items by date string (YYYY-MM-DD)
   const dateMap: Record<string, UsageItem[]> = {}
   items.forEach(item => {
-    const dateKey = item.occurred_at.split('T')[0]
+    let dateKey = ''
+    if (item.occurred_at.includes('T')) {
+      const d = new Date(item.occurred_at)
+      d.setMinutes(d.getMinutes() - d.getTimezoneOffset())
+      dateKey = d.toISOString().slice(0, 10)
+    } else {
+      dateKey = item.occurred_at
+    }
     if (!dateMap[dateKey]) {
       dateMap[dateKey] = []
     }
