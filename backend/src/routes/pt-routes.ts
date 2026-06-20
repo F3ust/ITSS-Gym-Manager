@@ -107,9 +107,14 @@ router.delete('/assignments/:id', async (req, res, next) => {
 router.get('/assignments', async (req, res, next) => {
   try {
     const ptId = String(req.query.ptId || '').trim()
+    const sql = `
+      SELECT pa.*, m.full_name AS member_name, m.phone AS member_phone 
+      FROM pt_assignments pa 
+      LEFT JOIN members m ON m.id = pa.member_id
+    `
     const result = ptId
-      ? await query('SELECT * FROM pt_assignments WHERE pt_id = $1 ORDER BY id', [ptId])
-      : await query('SELECT * FROM pt_assignments ORDER BY id')
+      ? await query(sql + ' WHERE pa.pt_id = $1 ORDER BY pa.id', [ptId])
+      : await query(sql + ' ORDER BY pa.id')
     res.json(result.rows)
   } catch (err) {
     next({ status: 500, code: 'ERR_PT_ASSIGN_LIST', message: 'Failed to list assignments', details: { error: String(err) } })
