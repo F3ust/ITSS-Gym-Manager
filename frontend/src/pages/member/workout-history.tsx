@@ -145,13 +145,13 @@ export default function WorkoutHistoryPage() {
               let borderStyle = '1px solid var(--stroke)'
 
               if (hasPT) {
-                cellBg = 'var(--accent)'
-                cellColor = '#ffffff'
-                borderStyle = '1px solid var(--accent)'
+                cellBg = 'var(--accent-light)'
+                cellColor = 'var(--text-strong)'
+                borderStyle = '2px solid var(--accent)'
               } else if (hasSelf) {
-                cellBg = '#3b82f6'
-                cellColor = '#ffffff'
-                borderStyle = '1px solid #3b82f6'
+                cellBg = '#eff6ff'
+                cellColor = 'var(--text-strong)'
+                borderStyle = '2px solid #3b82f6'
               }
 
               if (isSelected) {
@@ -195,7 +195,7 @@ export default function WorkoutHistoryPage() {
                           width: 4,
                           height: 4,
                           borderRadius: '50%',
-                          background: item.type === 'workout' ? '#10b981' : '#f59e0b'
+                          background: item.type === 'workout' ? 'var(--accent)' : '#3b82f6'
                         }}
                       />
                     ))}
@@ -208,11 +208,11 @@ export default function WorkoutHistoryPage() {
           {/* Legend */}
           <div style={{ display: 'flex', gap: 16, marginTop: 24, padding: '12px 0 0', borderTop: '1px solid var(--stroke)', fontSize: 12, flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ width: 14, height: 14, borderRadius: 4, background: 'var(--accent)' }} />
+              <span style={{ width: 14, height: 14, borderRadius: 4, background: 'var(--accent-light)', border: '2px solid var(--accent)' }} />
               <span style={{ fontWeight: 600 }}>PT Workout (Trainer Session)</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ width: 14, height: 14, borderRadius: 4, background: '#3b82f6' }} />
+              <span style={{ width: 14, height: 14, borderRadius: 4, background: '#eff6ff', border: '2px solid #3b82f6' }} />
               <span style={{ fontWeight: 600 }}>Self Workout (Gym Check-In)</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
