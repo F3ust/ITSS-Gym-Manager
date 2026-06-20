@@ -12,9 +12,24 @@ export default function StaffPage() {
   const [staff, setStaff] = useState<Staff[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [form, setForm] = useState({ fullName: '', roleTitle: '', username: '', password: '' })
 
   useEffect(() => { load() }, [])
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        handleClose()
+      }
+    }
+    if (showForm) {
+      window.addEventListener('keydown', handleKeyDown)
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [showForm])
 
   async function load() {
     try {
@@ -26,12 +41,22 @@ export default function StaffPage() {
     }
   }
 
-  async function handleCreate(e: React.FormEvent) {
-    e.preventDefault()
-    await apiPost('/staff', form)
+  function handleClose() {
     setShowForm(false)
     setForm({ fullName: '', roleTitle: '', username: '', password: '' })
-    load()
+    setError(null)
+  }
+
+  async function handleCreate(e: React.FormEvent) {
+    e.preventDefault()
+    setError(null)
+    try {
+      await apiPost('/staff', form)
+      handleClose()
+      load()
+    } catch (err: any) {
+      setError(err.message || 'Failed to create staff member')
+    }
   }
 
   if (loading) return <div className="page-loading">Loading...</div>
@@ -44,9 +69,16 @@ export default function StaffPage() {
       </div>
 
       {showForm && (
-        <div className="modal-overlay" onClick={() => setShowForm(false)}>
+        <div className="modal-overlay" onClick={handleClose}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <h3>Add Staff</h3>
+            
+            {error && (
+              <div style={{ background: 'var(--error-light)', color: 'var(--error)', padding: '10px 12px', borderRadius: 8, fontSize: 13, marginBottom: 16, border: '1px solid var(--error)' }}>
+                ⚠️ {error}
+              </div>
+            )}
+
             <form onSubmit={handleCreate}>
               <label>Full Name *</label>
               <input value={form.fullName} onChange={(e) => setForm(f => ({ ...f, fullName: e.target.value }))} required />
@@ -57,7 +89,7 @@ export default function StaffPage() {
               <label>Password *</label>
               <input type="password" value={form.password} onChange={(e) => setForm(f => ({ ...f, password: e.target.value }))} placeholder="8+ chars, letters + numbers" required />
               <div className="modal-actions">
-                <button type="button" className="btn-secondary" onClick={() => setShowForm(false)}>Cancel</button>
+                <button type="button" className="btn-secondary" onClick={handleClose}>Cancel</button>
                 <button type="submit" className="btn-primary">Create</button>
               </div>
             </form>
