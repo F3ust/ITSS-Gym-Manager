@@ -90,7 +90,7 @@ router.get('/usage-history', requireRole(['Owner', 'Staff', 'Member']), async (r
     }
 
     const checkins = await query(
-      `SELECT id, check_in_at AS occurred_at, method, remaining_sessions_after, 'checkin' AS type FROM check_ins WHERE member_id = $1 AND check_in_at::date >= $2 AND check_in_at::date <= $3 ORDER BY check_in_at DESC`,
+      `SELECT id, check_in_at AS occurred_at, method, with_pt, remaining_sessions_after, 'checkin' AS type FROM check_ins WHERE member_id = $1 AND check_in_at::date >= $2 AND check_in_at::date <= $3 ORDER BY check_in_at DESC`,
       [resolvedMemberId, from, to]
     )
 
