@@ -9,6 +9,7 @@ interface Feedback {
   content: string
   status: string
   created_at: string
+  responses?: { id: string; response: string; created_at: string }[]
 }
 
 export default function FeedbackInboxPage() {
@@ -19,6 +20,7 @@ export default function FeedbackInboxPage() {
   const [respondId, setRespondId] = useState<string | null>(null)
   const [respondText, setRespondText] = useState('')
   const [sending, setSending] = useState(false)
+  const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(null)
 
   useEffect(() => { load() }, [])
 
@@ -86,21 +88,97 @@ export default function FeedbackInboxPage() {
         <thead><tr><th>Category</th><th>Content</th><th>Rating</th><th>Status</th><th>Date</th><th></th></tr></thead>
         <tbody>
           {items.map((f) => (
-            <tr key={f.id}>
+            <tr key={f.id} onClick={() => setSelectedFeedback(f)} style={{ cursor: 'pointer' }}>
               <td><span className="badge">{f.category}</span></td>
               <td style={{ maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.content}</td>
               <td>{f.rating != null ? '★'.repeat(f.rating) + '☆'.repeat(5 - f.rating) : '-'}</td>
               <td><span className={`badge badge-${f.status}`}>{f.status}</span></td>
               <td>{new Date(f.created_at).toLocaleDateString()}</td>
               <td className="table-actions" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                {f.status === 'new' && <button className="btn-sm" onClick={() => updateStatus(f.id, 'processing')}>Process</button>}
-                {(f.status === 'new' || f.status === 'processing') && <button className="btn-sm btn-primary" onClick={() => openRespond(f.id)}>Respond</button>}
+                {f.status === 'new' && (
+                  <button className="btn-sm" onClick={(e) => { e.stopPropagation(); updateStatus(f.id, 'processing') }}>
+                    Process
+                  </button>
+                )}
+                {(f.status === 'new' || f.status === 'processing') && (
+                  <button className="btn-sm btn-primary" onClick={(e) => { e.stopPropagation(); openRespond(f.id) }}>
+                    Respond
+                  </button>
+                )}
               </td>
             </tr>
           ))}
           {items.length === 0 && <tr><td colSpan={6} className="table-empty">No feedback</td></tr>}
         </tbody>
       </table>
+
+      {/* Details Dialog */}
+      {selectedFeedback && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex',
+          alignItems: 'center', justifyContent: 'center', zIndex: 1000,
+        }} onClick={() => setSelectedFeedback(null)}>
+          <div className="card" style={{ padding: 24, width: 500, maxWidth: '90vw' }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <span className="badge" style={{ fontSize: 12 }}>{selectedFeedback.category}</span>
+              <span className={`badge badge-${selectedFeedback.status}`}>{selectedFeedback.status}</span>
+            </div>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase' }}>Created Date</div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-strong)', marginTop: 4 }}>
+                  {new Date(selectedFeedback.created_at).toLocaleString()}
+                </div>
+              </div>
+
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase' }}>Rating</div>
+                <div style={{ fontSize: 16, color: 'var(--accent)', marginTop: 4, fontWeight: 700 }}>
+                  {selectedFeedback.rating != null ? '★'.repeat(selectedFeedback.rating) + '☆'.repeat(5 - selectedFeedback.rating) : 'No Rating'}
+                </div>
+              </div>
+
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase' }}>Feedback Content</div>
+                <p style={{ fontSize: 14, color: 'var(--text-strong)', marginTop: 6, lineHeight: 1.5, background: 'var(--bg)', padding: 12, borderRadius: 8, border: '1px solid var(--stroke)', whiteSpace: 'pre-wrap' }}>
+                  {selectedFeedback.content}
+                </p>
+              </div>
+
+              {selectedFeedback.responses && selectedFeedback.responses.length > 0 && (
+                <div style={{ borderTop: '1px solid var(--stroke)', paddingTop: 16, marginTop: 8 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 8 }}>Staff Responses</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {selectedFeedback.responses.map((resp, rIdx) => (
+                      <div key={resp.id || rIdx} style={{ padding: 12, background: 'var(--accent-light)', border: '1px solid var(--accent)', borderRadius: 10 }}>
+                        <p style={{ fontSize: 13, color: 'var(--text-strong)', lineHeight: 1.4 }}>{resp.response}</p>
+                        <div style={{ fontSize: 10, color: 'var(--muted)', marginTop: 6, textAlign: 'right' }}>
+                          Responded at: {new Date(resp.created_at).toLocaleString()}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 24 }}>
+              {selectedFeedback.status === 'new' && (
+                <button className="btn-sm" onClick={(e) => { e.stopPropagation(); updateStatus(selectedFeedback.id, 'processing'); setSelectedFeedback(prev => prev ? { ...prev, status: 'processing' } : null) }}>
+                  Process
+                </button>
+              )}
+              {(selectedFeedback.status === 'new' || selectedFeedback.status === 'processing') && (
+                <button className="btn-sm btn-primary" onClick={(e) => { e.stopPropagation(); openRespond(selectedFeedback.id); setSelectedFeedback(null) }}>
+                  Respond
+                </button>
+              )}
+              <button type="button" className="btn-secondary" onClick={() => setSelectedFeedback(null)}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Respond Dialog */}
       {respondId && (
