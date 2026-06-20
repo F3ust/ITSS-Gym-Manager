@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { apiGet } from '../../api/client'
+import { fmtVND } from '../../utils/format'
 
 interface RevenueDay {
   day: string
@@ -31,11 +32,6 @@ interface StaffPerformance {
   total_sales: number
 }
 
-function formatCurrency(v: number) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 })
-    .format(v)
-    .replace('₫', 'VND')
-}
 
 // Timezone-safe date range generator
 function getDatesRange(startStr: string, endStr: string) {
@@ -175,15 +171,15 @@ export default function ReportsPage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
             <div className="stat-card" style={{ borderLeft: '4px solid #10b981', background: '#fff', borderRadius: 12, padding: 20, boxShadow: 'var(--shadow-soft)' }}>
               <div style={{ fontSize: 13, color: 'var(--muted)', fontWeight: 600 }}>Total Revenue</div>
-              <div style={{ fontSize: 24, fontWeight: 700, marginTop: 8, color: '#10b981' }}>{formatCurrency(revSum)}</div>
+              <div style={{ fontSize: 24, fontWeight: 700, marginTop: 8, color: '#10b981' }}>{fmtVND(revSum)}</div>
             </div>
             <div className="stat-card" style={{ borderLeft: '4px solid #3b82f6', background: '#fff', borderRadius: 12, padding: 20, boxShadow: 'var(--shadow-soft)' }}>
               <div style={{ fontSize: 13, color: 'var(--muted)', fontWeight: 600 }}>Daily Average</div>
-              <div style={{ fontSize: 24, fontWeight: 700, marginTop: 8, color: 'var(--text-strong)' }}>{formatCurrency(revAvg)}</div>
+              <div style={{ fontSize: 24, fontWeight: 700, marginTop: 8, color: 'var(--text-strong)' }}>{fmtVND(revAvg)}</div>
             </div>
             <div className="stat-card" style={{ borderLeft: '4px solid #f59e0b', background: '#fff', borderRadius: 12, padding: 20, boxShadow: 'var(--shadow-soft)' }}>
               <div style={{ fontSize: 13, color: 'var(--muted)', fontWeight: 600 }}>Peak Revenue Day</div>
-              <div style={{ fontSize: 24, fontWeight: 700, marginTop: 8, color: 'var(--text-strong)' }}>{formatCurrency(revMax)}</div>
+              <div style={{ fontSize: 24, fontWeight: 700, marginTop: 8, color: 'var(--text-strong)' }}>{fmtVND(revMax)}</div>
               <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 4 }}>Peak Date: {revMaxDay !== 'N/A' ? new Date(revMaxDay).toLocaleDateString() : 'N/A'}</div>
             </div>
             <div className="stat-card" style={{ borderLeft: '4px solid #8b5cf6', background: '#fff', borderRadius: 12, padding: 20, boxShadow: 'var(--shadow-soft)' }}>
@@ -250,7 +246,7 @@ export default function ReportsPage() {
                               <g key={idx}>
                                 <line x1={paddingLeft} y1={y} x2={width - paddingRight} y2={y} stroke="var(--stroke)" strokeDasharray="4 4" />
                                 <text x={paddingLeft - 10} y={y + 4} textAnchor="end" fontSize={11} fill="var(--muted)">
-                                  {formatCurrency(val)}
+                                  {fmtVND(val)}
                                 </text>
                               </g>
                             )
@@ -324,7 +320,7 @@ export default function ReportsPage() {
                             {new Date(points[hoveredIdx].day).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
                           </strong>
                           <span style={{ color: '#34d399', fontWeight: 700 }}>
-                            {formatCurrency(points[hoveredIdx].total)}
+                            {fmtVND(points[hoveredIdx].total)}
                           </span>
                         </div>
                       )}
@@ -349,7 +345,7 @@ export default function ReportsPage() {
                 {paddedRevenue.slice().reverse().map((r, i) => (
                   <tr key={i}>
                     <td>{new Date(r.day).toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</td>
-                    <td style={{ fontWeight: 600, color: r.total > 0 ? '#10b981' : undefined }}>{formatCurrency(r.total)}</td>
+                    <td style={{ fontWeight: 600, color: r.total > 0 ? '#10b981' : undefined }}>{fmtVND(r.total)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -604,7 +600,7 @@ export default function ReportsPage() {
                   <td>{new Date(p.period_start).toLocaleDateString()} - {new Date(p.period_end).toLocaleDateString()}</td>
                   <td>{p.checkins_processed} check-ins</td>
                   <td>{p.subscriptions_registered} registrations</td>
-                  <td style={{ fontWeight: 600, color: 'var(--accent)' }}>{formatCurrency(p.total_sales)}</td>
+                  <td style={{ fontWeight: 600, color: 'var(--accent)' }}>{fmtVND(p.total_sales)}</td>
                 </tr>
               ))}
               {performanceData.length === 0 && (

@@ -2,14 +2,11 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/auth-context'
 import { apiGet, apiPost } from '../../api/client'
+import { fmtVND } from '../../utils/format'
 
 interface Member { id: string; user_id: string }
 interface Package { id: string; name: string; duration_days: number; price: number; category: string; session_count?: number | null; pt_session_count?: number | null; status: string }
 interface PtProfile { id: string; full_name: string; bio?: string | null }
-
-function formatCurrency(v: number) {
-  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(v)
-}
 
 export default function RegisterPackagePage() {
   const { user } = useAuth()
@@ -49,15 +46,15 @@ export default function RegisterPackagePage() {
       return
     }
 
-    const activeOrPendingGymSubs = existingSubs.filter(s => {
-      if (s.status !== 'active' && s.status !== 'pending') return false
+    const gymSubs = existingSubs.filter(s => {
+      if (s.status === 'cancelled') return false
       const sPkg = packages.find(p => p.id === s.package_id)
       return sPkg?.category === 'membership' || sPkg?.category === 'combo'
     })
 
-    if (activeOrPendingGymSubs.length > 0) {
-      let maxEnd = new Date(activeOrPendingGymSubs[0].end_date)
-      for (const s of activeOrPendingGymSubs) {
+    if (gymSubs.length > 0) {
+      let maxEnd = new Date(gymSubs[0].end_date)
+      for (const s of gymSubs) {
         const d = new Date(s.end_date)
         if (d > maxEnd) {
           maxEnd = d
@@ -181,7 +178,7 @@ export default function RegisterPackagePage() {
                       <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>Duration: {p.duration_days} days</div>
                     </div>
                     <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--accent)', marginTop: 8 }}>
-                      {formatCurrency(p.price)}
+                      {fmtVND(p.price)}
                     </div>
                   </div>
                 )
@@ -214,7 +211,7 @@ export default function RegisterPackagePage() {
                       <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>Sessions: {p.pt_session_count} PT sessions</div>
                     </div>
                     <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--accent)', marginTop: 8 }}>
-                      {formatCurrency(p.price)}
+                      {fmtVND(p.price)}
                     </div>
                   </div>
                 )
@@ -247,7 +244,7 @@ export default function RegisterPackagePage() {
                       <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>Details: {p.duration_days} days + {p.pt_session_count} PT sessions</div>
                     </div>
                     <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--accent)', marginTop: 8 }}>
-                      {formatCurrency(p.price)}
+                      {fmtVND(p.price)}
                     </div>
                   </div>
                 )
@@ -312,7 +309,7 @@ export default function RegisterPackagePage() {
           <div className="card" style={{ padding: 20, background: 'var(--chip)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
               <div>
-                <div style={{ fontWeight: 600 }}>{selectedPkg.name} — {formatCurrency(selectedPkg.price)}</div>
+                <div style={{ fontWeight: 600 }}>{selectedPkg.name} — {fmtVND(selectedPkg.price)}</div>
                 <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 2 }}>
                   Category: {selectedPkg.category === 'pt' ? 'PT' : selectedPkg.category === 'combo' ? 'Combo' : 'Gym Entry'} &middot; Start: {new Date(startDate).toLocaleDateString()} &middot; End: {endDateStr}
                 </div>

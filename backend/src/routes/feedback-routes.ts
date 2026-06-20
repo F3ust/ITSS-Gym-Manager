@@ -65,8 +65,22 @@ router.get('/', async (req, res, next) => {
       return res.json(result.rows)
     }
     const result = status
-      ? await query('SELECT * FROM feedback WHERE status = $1 ORDER BY created_at DESC', [status])
-      : await query('SELECT * FROM feedback ORDER BY created_at DESC')
+      ? await query(
+          `SELECT f.*, json_agg(json_build_object('id', fr.id, 'response', fr.response, 'created_at', fr.created_at)
+            ORDER BY fr.created_at ASC) FILTER (WHERE fr.id IS NOT NULL) AS responses
+           FROM feedback f
+           LEFT JOIN feedback_responses fr ON fr.feedback_id = f.id
+           WHERE f.status = $1
+           GROUP BY f.id ORDER BY f.created_at DESC`,
+          [status]
+        )
+      : await query(
+          `SELECT f.*, json_agg(json_build_object('id', fr.id, 'response', fr.response, 'created_at', fr.created_at)
+            ORDER BY fr.created_at ASC) FILTER (WHERE fr.id IS NOT NULL) AS responses
+           FROM feedback f
+           LEFT JOIN feedback_responses fr ON fr.feedback_id = f.id
+           GROUP BY f.id ORDER BY f.created_at DESC`
+        )
     res.json(result.rows)
   } catch (err) {
     next({ status: 500, code: 'ERR_FEEDBACK_LIST', message: 'Failed to list feedback', details: { error: String(err) } })

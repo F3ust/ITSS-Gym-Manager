@@ -27,8 +27,11 @@ function mapDbRow(row: any): AppNotification {
 
 export function pushNotification(icon: string, message: string) {
   const all = loadLocal()
+  const exists = all.some(n => n.message === message)
+  if (exists) return
   all.unshift({ id: crypto.randomUUID(), icon, message, timestamp: new Date().toISOString(), read: false })
   saveLocal(all)
+  window.dispatchEvent(new Event('storage'))
 }
 
 export function useNotifications(memberId?: string) {

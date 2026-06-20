@@ -1,15 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiGet } from '../../api/client'
+import { fmtVND } from '../../utils/format'
 
 interface Package {
   id: string; name: string; duration_days: number;
   price: number; category: string; description: string | null; status: string;
   pt_session_count?: number | null;
-}
-
-function formatCurrency(v: number) {
-  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(v)
 }
 
 export default function AvailablePackagesPage() {
@@ -39,7 +36,7 @@ export default function AvailablePackagesPage() {
       </div>
       <div style={{ marginTop: 12 }}>
         <span style={{ fontWeight: 700, fontSize: 18, color: 'var(--accent)', display: 'block', marginBottom: 8 }}>
-          {formatCurrency(p.price)}
+          {fmtVND(p.price)}
         </span>
         <button
           className="btn-primary"

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { apiGet, apiPost } from '../../api/client'
+import { fmtVND } from '../../utils/format'
 
 interface Subscription {
   id: string; member_id: string; package_id: string
@@ -9,10 +10,6 @@ interface Subscription {
 }
 interface Package { id: string; name: string; price: number; duration_days: number; session_count: number | null; category: string }
 interface Member { id: string; full_name: string; phone: string }
-
-function formatCurrency(v: number) {
-  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(v)
-}
 
 export default function MemberPaymentPage() {
   const { subscriptionId } = useParams()
@@ -50,7 +47,7 @@ export default function MemberPaymentPage() {
     setError('')
     try {
       await apiPost('/payments', { subscriptionId: sub.id, amount: pkg.price, method, endDate: sub.end_date, remainingSessions: null })
-      setMessage(`Payment of ${formatCurrency(pkg.price)} via ${method === 'transfer' ? 'Bank Transfer' : 'Credit Card'} successful`)
+      setMessage(`Payment of ${fmtVND(pkg.price)} via ${method === 'transfer' ? 'Bank Transfer' : 'Credit Card'} successful`)
       setDone(true)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Payment failed')
@@ -103,7 +100,7 @@ export default function MemberPaymentPage() {
                   )}
                   <div style={{ borderTop: '1px solid var(--stroke)', marginTop: 6, paddingTop: 10, display: 'flex', justifyContent: 'space-between' }}>
                     <span style={{ fontWeight: 600 }}>Total</span>
-                    {pkg && <span style={{ fontSize: 20, fontWeight: 700, color: 'var(--accent)' }}>{formatCurrency(pkg.price)}</span>}
+                    {pkg && <span style={{ fontSize: 20, fontWeight: 700, color: 'var(--accent)' }}>{fmtVND(pkg.price)}</span>}
                   </div>
                 </div>
               )}
@@ -177,7 +174,7 @@ export default function MemberPaymentPage() {
               disabled={processing}
               style={{ padding: '14px 28px', fontSize: 15, opacity: processing ? 0.7 : 1 }}
             >
-              {processing ? 'Processing...' : `Pay ${pkg ? formatCurrency(pkg.price) : ''}`}
+              {processing ? 'Processing...' : `Pay ${pkg ? fmtVND(pkg.price) : ''}`}
             </button>
           </form>
         )}

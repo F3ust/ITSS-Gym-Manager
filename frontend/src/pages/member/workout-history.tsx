@@ -7,6 +7,7 @@ interface UsageItem {
   occurred_at: string
   type: 'checkin' | 'workout'
   method?: string
+  with_pt?: boolean
   remaining_sessions_after?: number | null
   duration_min?: number
   intensity?: string | null
@@ -40,7 +41,14 @@ export default function WorkoutHistoryPage() {
   // Group items by date string (YYYY-MM-DD)
   const dateMap: Record<string, UsageItem[]> = {}
   items.forEach(item => {
-    const dateKey = item.occurred_at.split('T')[0]
+    let dateKey = ''
+    if (item.occurred_at.includes('T')) {
+      const d = new Date(item.occurred_at)
+      d.setMinutes(d.getMinutes() - d.getTimezoneOffset())
+      dateKey = d.toISOString().slice(0, 10)
+    } else {
+      dateKey = item.occurred_at
+    }
     if (!dateMap[dateKey]) {
       dateMap[dateKey] = []
     }
@@ -135,8 +143,8 @@ export default function WorkoutHistoryPage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 10 }}>
             {daysGrid.map((cell, idx) => {
               const cellItems = dateMap[cell.dateStr] || []
-              const hasPT = cellItems.some(i => i.type === 'workout')
-              const hasSelf = cellItems.some(i => i.type === 'checkin') && !hasPT
+              const hasPTCheckin = cellItems.some(i => i.type === 'checkin' && i.with_pt)
+              const hasActivity = cellItems.length > 0
               const isSelected = cell.dateStr === selectedDateStr
               const isToday = cell.dateStr === new Date().toISOString().slice(0, 10)
 
@@ -144,14 +152,14 @@ export default function WorkoutHistoryPage() {
               let cellColor = 'var(--text-strong)'
               let borderStyle = '1px solid var(--stroke)'
 
-              if (hasPT) {
-                cellBg = 'var(--accent)'
-                cellColor = '#ffffff'
-                borderStyle = '1px solid var(--accent)'
-              } else if (hasSelf) {
-                cellBg = '#3b82f6'
-                cellColor = '#ffffff'
-                borderStyle = '1px solid #3b82f6'
+              if (hasPTCheckin) {
+                cellBg = 'var(--accent-light)'
+                cellColor = 'var(--text-strong)'
+                borderStyle = '2px solid var(--accent)'
+              } else if (hasActivity) {
+                cellBg = '#eff6ff'
+                cellColor = 'var(--text-strong)'
+                borderStyle = '2px solid #3b82f6'
               }
 
               if (isSelected) {
@@ -185,21 +193,6 @@ export default function WorkoutHistoryPage() {
                   }}
                 >
                   {cell.dayNum}
-                  
-                  {/* Miniature Indicator Dots */}
-                  <div style={{ display: 'flex', gap: 3, marginTop: 4, position: 'absolute', bottom: 6 }}>
-                    {cellItems.map((item, iIdx) => (
-                      <span
-                        key={iIdx}
-                        style={{
-                          width: 4,
-                          height: 4,
-                          borderRadius: '50%',
-                          background: item.type === 'workout' ? '#10b981' : '#f59e0b'
-                        }}
-                      />
-                    ))}
-                  </div>
                 </button>
               )
             })}
@@ -208,16 +201,16 @@ export default function WorkoutHistoryPage() {
           {/* Legend */}
           <div style={{ display: 'flex', gap: 16, marginTop: 24, padding: '12px 0 0', borderTop: '1px solid var(--stroke)', fontSize: 12, flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ width: 14, height: 14, borderRadius: 4, background: 'var(--accent)' }} />
-              <span style={{ fontWeight: 600 }}>PT Workout (Trainer Session)</span>
+              <span style={{ width: 14, height: 14, borderRadius: 4, background: 'var(--accent-light)', border: '2px solid var(--accent)' }} />
+              <span style={{ fontWeight: 600 }}>Check-In with PT (Trainer Session)</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ width: 14, height: 14, borderRadius: 4, background: '#3b82f6' }} />
-              <span style={{ fontWeight: 600 }}>Self Workout (Gym Check-In)</span>
+              <span style={{ width: 14, height: 14, borderRadius: 4, background: '#eff6ff', border: '2px solid #3b82f6' }} />
+              <span style={{ fontWeight: 600 }}>Self Check-In / Workout Activity</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <span style={{ width: 14, height: 14, borderRadius: 4, background: 'var(--panel)', border: '1px solid var(--stroke)' }} />
-              <span style={{ color: 'var(--muted)' }}>No Workout Activity</span>
+              <span style={{ color: 'var(--muted)' }}>No Activity</span>
             </div>
           </div>
         </div>

@@ -30,6 +30,7 @@ export default function PtSchedulePage() {
     if (!user) return
     try {
       setLoading(true)
+      setError('')
       const mems = await apiGet<Member[]>('/members')
       setMembers(new Map(mems.map((m: Member) => [m.id, m])))
       const profile = await apiGet<PtProfile>('/pt/profile?userId=' + user.id)
@@ -38,6 +39,8 @@ export default function PtSchedulePage() {
         const sch = await apiGet<Schedule[]>('/pt/schedules?ptId=' + profile.id)
         setSchedules(sch)
       }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load data')
     } finally {
       setLoading(false)
     }
@@ -71,9 +74,19 @@ export default function PtSchedulePage() {
     <div className="page-container">
       <div className="page-header">
         <h2>PT Schedule</h2>
-        <button className="btn-primary" onClick={() => setShowForm(true)}>New Session</button>
+        <button
+          className="btn-primary"
+          onClick={() => setShowForm(true)}
+          disabled={!ptProfile}
+          title={!ptProfile ? 'Your PT profile could not be loaded' : undefined}
+        >
+          New Session
+        </button>
       </div>
       {error && <p className="form-error">{error}</p>}
+      {!ptProfile && !error && (
+        <p className="form-error">Could not load your PT profile — please sign out and sign in again.</p>
+      )}
       {message && <p style={{ color: '#2e7d32', fontSize: 14 }}>{message}</p>}
 
       {showForm && (

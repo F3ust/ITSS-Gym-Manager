@@ -7,5 +7,5 @@ export function fmtDateTime(date: string | Date) {
 }
 
 export function fmtVND(amount: number) {
-  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount)
+  return new Intl.NumberFormat('vi-VN').format(amount) + ' VNĐ'
 }
