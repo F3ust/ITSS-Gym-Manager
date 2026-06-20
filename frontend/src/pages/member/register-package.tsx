@@ -49,15 +49,15 @@ export default function RegisterPackagePage() {
       return
     }
 
-    const activeOrPendingGymSubs = existingSubs.filter(s => {
-      if (s.status !== 'active' && s.status !== 'pending') return false
+    const gymSubs = existingSubs.filter(s => {
+      if (s.status === 'cancelled') return false
       const sPkg = packages.find(p => p.id === s.package_id)
       return sPkg?.category === 'membership' || sPkg?.category === 'combo'
     })
 
-    if (activeOrPendingGymSubs.length > 0) {
-      let maxEnd = new Date(activeOrPendingGymSubs[0].end_date)
-      for (const s of activeOrPendingGymSubs) {
+    if (gymSubs.length > 0) {
+      let maxEnd = new Date(gymSubs[0].end_date)
+      for (const s of gymSubs) {
         const d = new Date(s.end_date)
         if (d > maxEnd) {
           maxEnd = d
