@@ -147,13 +147,6 @@ export default function MyPackagePage() {
         </div>
       )}
 
-      <style>{`
-        .detail-card { background: #fff; border-radius: 8px; padding: 16px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
-        .detail-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
-        .detail-row:last-child { border-bottom: none; }
-        .detail-label { font-size: 14px; color: #666; }
-        .detail-value { font-size: 15px; color: #333; text-align: right; }
-      `}</style>
     </div>
   )
 }

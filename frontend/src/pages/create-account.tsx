@@ -8,6 +8,7 @@ export default function CreateAccountPage() {
   const navigate = useNavigate()
   const [form, setForm] = useState({ name: '', phone: '', password: '', dob: '' })
   const [error, setError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
   const update = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((f) => ({ ...f, [field]: e.target.value }))
@@ -31,12 +32,14 @@ export default function CreateAccountPage() {
     setError('')
     const dobErr = validateDob(form.dob)
     if (dobErr) { setError(dobErr); return }
+    setSubmitting(true)
     try {
       const data = await registerApi(form)
       login(data.token, data.user)
       navigate(`/${data.user.role}`)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed')
+      setSubmitting(false)
     }
   }
 
@@ -46,11 +49,54 @@ export default function CreateAccountPage() {
         <h1>Create Account</h1>
         <p className="subtitle">Join the gym today</p>
         {error && <p className="form-error">{error}</p>}
-        <input placeholder="Full name" value={form.name} onChange={update('name')} required />
-        <input placeholder="Phone number (10 digits)" value={form.phone} onChange={update('phone')} required />
-        <input type="password" placeholder="Password (8+ chars, letters + numbers)" value={form.password} onChange={update('password')} required />
-        <input placeholder="Date of birth (dd/MM/yyyy)" value={form.dob} onChange={update('dob')} required />
-        <button type="submit">Register</button>
+        <div className="form-group">
+          <label htmlFor="reg-name">Full Name</label>
+          <input
+            id="reg-name"
+            placeholder="Enter your full name"
+            value={form.name}
+            onChange={update('name')}
+            required
+            disabled={submitting}
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="reg-phone">Phone Number</label>
+          <input
+            id="reg-phone"
+            placeholder="e.g. 0912345678"
+            value={form.phone}
+            onChange={update('phone')}
+            required
+            disabled={submitting}
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="reg-password">Password</label>
+          <input
+            id="reg-password"
+            type="password"
+            placeholder="Min 8 chars, letters + numbers"
+            value={form.password}
+            onChange={update('password')}
+            required
+            disabled={submitting}
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="reg-dob">Date of Birth</label>
+          <input
+            id="reg-dob"
+            placeholder="dd/MM/yyyy (e.g. 15/08/1998)"
+            value={form.dob}
+            onChange={update('dob')}
+            required
+            disabled={submitting}
+          />
+        </div>
+        <button type="submit" style={{ marginTop: 8 }} disabled={submitting}>
+          {submitting ? 'Registering...' : 'Register'}
+        </button>
         <p className="form-footer">
           Already have an account? <Link to="/login">Sign in</Link>
         </p>

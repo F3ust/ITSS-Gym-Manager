@@ -107,7 +107,24 @@ export default function PackagesPage() {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount)
   }
 
-  if (loading) return <div className="page-loading">Loading...</div>
+  if (loading) return (
+    <div className="page-container">
+      <div className="page-header">
+        <div className="skeleton-header" style={{ width: 140 }} />
+        <div className="skeleton-header" style={{ width: 120, height: 42, borderRadius: 12 }} />
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 24, marginTop: 16 }}>
+        <div>
+          <div className="skeleton-header" style={{ width: 180, height: 20, marginBottom: 16 }} />
+          <div className="stats-grid">
+            <div className="skeleton-card" style={{ minHeight: 180 }} />
+            <div className="skeleton-card" style={{ minHeight: 180 }} />
+            <div className="skeleton-card" style={{ minHeight: 180 }} />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 
   return (
     <div className="page-container">

@@ -100,7 +100,7 @@ This document lists the initial REST API surface for the gym management system.
 - POST /api/feedback
 - GET /api/feedback?status=... (with memberId returns responses array)
 - GET /api/feedback/notifications?status=... (Owner/Staff)
-- PATCH /api/feedback/{id}/status
+- PATCH /api/feedback/{id}/status (Owner/Staff)
 - POST /api/feedback/{id}/response (Owner/Staff)
   - Payload: `{ staffId?, response }`
   - Sets feedback status to `completed`, creates `member_notifications` entry

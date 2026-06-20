@@ -109,19 +109,30 @@ router.get('/:id', async (req, res, next) => {
   }
 })
 
-router.patch('/:id/status', async (req, res, next) => {
+router.patch('/:id/status', requireRole(['Owner', 'Staff']), async (req, res, next) => {
+  let client
   try {
     const { status } = req.body
     if (!status) {
       return res.status(400).json({ code: 'ERR_VALIDATION', message: 'Missing status' })
     }
-    const result = await query('UPDATE feedback SET status = $1 WHERE id = $2 RETURNING *', [status, req.params.id])
+    client = await pool.connect()
+    await client.query('BEGIN')
+    const result = await client.query('UPDATE feedback SET status = $1 WHERE id = $2 RETURNING *', [status, req.params.id])
     if (!result.rows[0]) {
+      await client.query('ROLLBACK')
       return res.status(404).json({ code: 'ERR_NOT_FOUND', message: 'Feedback not found' })
     }
+    await client.query('UPDATE feedback_notifications SET status = $1 WHERE feedback_id = $2', [status, req.params.id])
+    await client.query('COMMIT')
     res.json(result.rows[0])
   } catch (err) {
+    if (client) {
+      try { await client.query('ROLLBACK') } catch { /* */ }
+    }
     next({ status: 500, code: 'ERR_FEEDBACK_STATUS', message: 'Failed to update feedback status', details: { error: String(err) } })
+  } finally {
+    client?.release()
   }
 })
 
@@ -140,6 +151,10 @@ router.post('/:id/response', requireRole(['Owner', 'Staff']), async (req, res, n
     )
     await client.query(
       "UPDATE feedback SET status = 'completed' WHERE id = $1",
+      [req.params.id]
+    )
+    await client.query(
+      "UPDATE feedback_notifications SET status = 'completed' WHERE feedback_id = $1",
       [req.params.id]
     )
     const feedback = await client.query('SELECT member_id FROM feedback WHERE id = $1', [req.params.id])
