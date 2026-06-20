@@ -12,6 +12,7 @@ export default function MyPackagePage() {
   const navigate = useNavigate()
   const [gymSubs, setGymSubs] = useState<any[]>([])
   const [totalPtSessions, setTotalPtSessions] = useState<number | null>(null)
+  const [activePtName, setActivePtName] = useState<string | null>(null)
   const [allPkgs, setAllPkgs] = useState<Package[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -21,8 +22,10 @@ export default function MyPackagePage() {
       if (!member) return
       Promise.all([
         apiGet<Subscription[]>('/subscriptions?memberId=' + member.id),
-        apiGet<Package[]>('/packages')
-      ]).then(([subs, pkgs]) => {
+        apiGet<Package[]>('/packages'),
+        apiGet<any[]>('/pt/assignments'),
+        apiGet<any[]>('/pt/profiles')
+      ]).then(([subs, pkgs, assignments, ptProfiles]) => {
         setAllPkgs(pkgs)
         const memberSubs = subs.filter((s) => s.member_id === member.id)
         
@@ -35,6 +38,14 @@ export default function MyPackagePage() {
           }
         })
         setTotalPtSessions(hasPt ? ptSum : null)
+
+        const activeAssign = assignments.find(a => a.member_id === member.id && a.status === 'active')
+        if (activeAssign) {
+          const pt = ptProfiles.find(p => p.id === activeAssign.pt_id)
+          if (pt) {
+            setActivePtName(pt.full_name)
+          }
+        }
 
         const gymEntrySubs = memberSubs.filter((s) => {
           const pkg = pkgs.find((p) => p.id === s.package_id)
@@ -65,7 +76,7 @@ export default function MyPackagePage() {
   const activeGymPkg = activeGymSub ? allPkgs.find(p => p.id === activeGymSub.package_id) : null
 
   // Find upcoming/pending gym entry subscriptions
-  const upcomingGymSubs = gymSubs.filter(s => s.id !== activeGymSub?.id)
+  const upcomingGymSubs = gymSubs.filter(s => s.id !== activeGymSub?.id && s.start_date > today)
 
   return (
     <div className="page-container">
@@ -76,6 +87,7 @@ export default function MyPackagePage() {
         <div style={{ marginBottom: 24 }}>
           <h3 style={{ marginBottom: 12 }}>Personal Trainer Sessions</h3>
           <div className="detail-card">
+            <div className="detail-row"><span className="detail-label">Your Personal Trainer</span><span className="detail-value" style={{ fontWeight: 600 }}>{activePtName || 'Not assigned'}</span></div>
             <div className="detail-row"><span className="detail-label">Total Remaining PT Sessions</span><span className="detail-value" style={{ fontSize: 20, fontWeight: 700, color: 'var(--accent)' }}>{totalPtSessions} sessions</span></div>
             <div className="detail-row"><span className="detail-label">Expiration</span><span className="detail-value" style={{ fontWeight: 600 }}>No expiration date</span></div>
           </div>

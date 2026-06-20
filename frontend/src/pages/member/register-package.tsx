@@ -114,8 +114,8 @@ export default function RegisterPackagePage() {
     }
     const pkg = packages.find((p) => p.id === packageId)
     if (!pkg) return
-    if (pkg.category === 'pt' && !ptId) {
-      setError('Select a PT for this PT package')
+    if ((pkg.category === 'pt' || pkg.category === 'combo') && !ptId) {
+      setError('Select a PT for this package')
       return
     }
     setError('')
@@ -130,7 +130,7 @@ export default function RegisterPackagePage() {
         remainingSessions: null,
         remainingPtSessions: pkg.pt_session_count || null,
       })
-      if (pkg.category === 'pt' && ptId) {
+      if ((pkg.category === 'pt' || pkg.category === 'combo') && ptId) {
         await apiPost('/pt/assignments', { ptId, memberId: member.id })
       }
       navigate(`/member/payment/${sub.id}`)
@@ -255,7 +255,7 @@ export default function RegisterPackagePage() {
             </div>
           </div>
 
-          {selectedPkg?.category === 'pt' && (
+          {(selectedPkg?.category === 'pt' || selectedPkg?.category === 'combo') && (
             <div style={{ marginTop: 14 }}>
               <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--muted)', display: 'block', marginBottom: 6 }}>
                 Personal Trainer *
