@@ -64,7 +64,12 @@ export default function PtSchedulePage() {
       setMessage('Session created')
       load()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create')
+      const msg = err instanceof Error ? err.message : 'Failed to create'
+      setError(
+        /conflict/i.test(msg)
+          ? 'This time slot conflicts with an existing session for this PT or member. Please choose a different time.'
+          : msg
+      )
     }
   }
 
@@ -76,23 +81,24 @@ export default function PtSchedulePage() {
         <h2>PT Schedule</h2>
         <button
           className="btn-primary"
-          onClick={() => setShowForm(true)}
+          onClick={() => { setError(''); setMessage(''); setShowForm(true) }}
           disabled={!ptProfile}
           title={!ptProfile ? 'Your PT profile could not be loaded' : undefined}
         >
           New Session
         </button>
       </div>
-      {error && <p className="form-error">{error}</p>}
+      {!showForm && error && <p className="form-error">{error}</p>}
       {!ptProfile && !error && (
         <p className="form-error">Could not load your PT profile — please sign out and sign in again.</p>
       )}
       {message && <p style={{ color: '#2e7d32', fontSize: 14 }}>{message}</p>}
 
       {showForm && (
-        <div className="modal-overlay" onClick={() => setShowForm(false)}>
+        <div className="modal-overlay" onClick={() => { setShowForm(false); setError('') }}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <h3>New Session</h3>
+            {error && <p className="form-error" role="alert">{error}</p>}
             <form onSubmit={handleCreate}>
               <label>Member *</label>
               <select value={form.memberId} onChange={(e) => setForm(f => ({ ...f, memberId: e.target.value }))} required>
@@ -106,7 +112,7 @@ export default function PtSchedulePage() {
               <label>Workout Type *</label>
               <input value={form.workoutType} onChange={(e) => setForm(f => ({ ...f, workoutType: e.target.value }))} required />
               <div className="modal-actions">
-                <button type="button" className="btn-secondary" onClick={() => setShowForm(false)}>Cancel</button>
+                <button type="button" className="btn-secondary" onClick={() => { setShowForm(false); setError('') }}>Cancel</button>
                 <button type="submit" className="btn-primary">Create</button>
               </div>
             </form>
