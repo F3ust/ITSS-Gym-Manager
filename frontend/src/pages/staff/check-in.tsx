@@ -10,6 +10,7 @@ export default function CheckInPage() {
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [ptDialog, setPtDialog] = useState<{ memberId: string } | null>(null)
+  const [checkingMemberId, setCheckingMemberId] = useState<string | null>(null)
 
   const search = useCallback(async () => {
     if (!query.trim()) return
@@ -24,25 +25,35 @@ export default function CheckInPage() {
   }, [query])
 
   async function checkPt(memberId: string) {
+    if (checkingMemberId) return
+    setCheckingMemberId(memberId)
+    setError('')
+    setMessage('')
     try {
       const assigns = await apiGet<PtAssignment[]>('/pt/assignments')
       if (assigns.some((a) => a.member_id === memberId && a.status !== 'inactive')) {
         setPtDialog({ memberId })
+        setCheckingMemberId(null)
         return
       }
-    } catch {}
-    doCheckIn(memberId, false)
+    } catch (err) {
+      console.error('Failed to check PT assignments:', err)
+    }
+    await doCheckIn(memberId, false)
   }
 
   async function doCheckIn(memberId: string, withPt: boolean) {
     setError('')
     setMessage('')
     setPtDialog(null)
+    setCheckingMemberId(memberId)
     try {
       await apiPost('/check-ins', { memberId, method: 'id_search', withPt })
       setMessage(withPt ? 'Check-in successful (PT session used)' : 'Check-in successful')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Check-in failed')
+    } finally {
+      setCheckingMemberId(null)
     }
   }
 
@@ -64,7 +75,15 @@ export default function CheckInPage() {
                 <td>{m.full_name}</td>
                 <td>{m.phone}</td>
                 <td><span className="badge">{m.member_type}</span></td>
-                <td><button className="btn-primary btn-sm" onClick={() => checkPt(m.id)}>Check In</button></td>
+                <td>
+                  <button 
+                    className="btn-primary btn-sm" 
+                    onClick={() => checkPt(m.id)}
+                    disabled={checkingMemberId !== null}
+                  >
+                    {checkingMemberId === m.id ? 'Checking...' : 'Check In'}
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
