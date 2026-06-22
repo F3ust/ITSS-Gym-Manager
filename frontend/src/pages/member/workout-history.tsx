@@ -235,9 +235,9 @@ export default function WorkoutHistoryPage() {
                   key={idx}
                   style={{
                     padding: 16,
-                    background: item.type === 'workout' ? 'var(--accent-light)' : 'var(--bg)',
+                    background: (item.type === 'workout' || item.with_pt) ? 'var(--accent-light)' : 'var(--bg)',
                     borderRadius: 12,
-                    border: item.type === 'workout' ? '1px solid var(--accent)' : '1px solid var(--stroke)',
+                    border: (item.type === 'workout' || item.with_pt) ? '1px solid var(--accent)' : '1px solid var(--stroke)',
                     display: 'flex',
                     flexDirection: 'column',
                     gap: 8
@@ -245,10 +245,10 @@ export default function WorkoutHistoryPage() {
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6, fontSize: 14 }}>
-                      {item.type === 'workout' ? '🏋️‍♂️ PT Workout Session' : '🔑 Gym Check-In'}
+                      {item.type === 'workout' ? '🏋️‍♂️ PT Workout Session' : (item.with_pt ? '🔑 Gym Check-In (PT)' : '🔑 Gym Check-In')}
                     </span>
-                    <span className="badge" style={{ background: item.type === 'workout' ? 'var(--accent)' : 'var(--chip)', color: item.type === 'workout' ? '#fff' : 'var(--text-strong)', fontSize: 11 }}>
-                      {item.type === 'workout' ? 'With Trainer' : 'Self Workout'}
+                    <span className="badge" style={{ background: (item.type === 'workout' || item.with_pt) ? 'var(--accent)' : 'var(--chip)', color: (item.type === 'workout' || item.with_pt) ? '#fff' : 'var(--text-strong)', fontSize: 11 }}>
+                      {(item.type === 'workout' || item.with_pt) ? 'With Trainer' : 'Self Workout'}
                     </span>
                   </div>
 
